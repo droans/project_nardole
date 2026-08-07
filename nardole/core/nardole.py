@@ -3,15 +3,17 @@
 import asyncio
 from pathlib import Path
 
+import magic
 import yaml
 from meilisearch import Client
 
-from nardole.const import CONFIG_ENTRY_PATH, PERMISSIONS_FILE_PATH
+from nardole.const import ATTACHMENT_ENDPOINT, CONFIG_ENTRY_PATH, PERMISSIONS_FILE_PATH, SAVE_FILE_PATH
 from nardole.core.registry.config_entries import ConfigEntryRegistry
 from nardole.core.registry.integrations import IntegrationRegistry
 from nardole.core.registry.services import ServiceRegistry
 from nardole.models.config import ConfigModel
 from nardole.models.indexing import EmbedderSettings
+from nardole.models.indices.settings import IndexFileModel
 
 
 class Nardole:
@@ -77,3 +79,23 @@ def load_config_from_path(config_file: Path | str) -> ConfigModel:
     with open(config_file) as f:
         raw_config = yaml.safe_load(f)
     return ConfigModel.model_validate(raw_config)
+
+
+def save_attachment(unique_id: str, data: str | bytes) -> IndexFileModel:
+    """Save down a single attachment."""
+    content_type = magic.from_buffer(data)
+    mime = magic.from_buffer(data, mime=True)
+    suffix = mime.split("/")[-1]
+    fname = f"{unique_id}.{suffix}"
+    if not SAVE_FILE_PATH.exists():
+        SAVE_FILE_PATH.mkdir()
+    file_path = SAVE_FILE_PATH.joinpath(fname)
+    if not file_path.exists():
+        open_mode = "wb" if isinstance(data, bytes) else "w"
+        with open(fname, open_mode) as f:
+            f.write(data)
+    return IndexFileModel(
+        file_name=fname,
+        content_type=content_type,
+        src=f"{ATTACHMENT_ENDPOINT}/{fname}",
+    )
