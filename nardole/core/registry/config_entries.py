@@ -80,9 +80,9 @@ class ConfigEntryRegistry:
         self.config_entries[integration.entry_id] = entry
         return entry
 
-    def load_from_entries(self, entries_json_path: Path) -> None:
+    def load_from_entries(self) -> None:
         """Load config from entries."""
-        with open(entries_json_path) as f:
+        with open(self._entries_path) as f:
             raw_entries = json.loads(f.read())
         all_entries = [ConfigEntry.model_validate(entry) for entry in raw_entries]
         [self.load_config_entry(entry) for entry in all_entries]
