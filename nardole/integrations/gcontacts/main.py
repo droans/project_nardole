@@ -47,6 +47,8 @@ class GContactsIntegration:
             grant_opts=None,
             function=self.update_contacts,
             service_schema=RefreshContactsServiceSchema,
+            user_service=True,
+            model_service=False,
         )
         self.nardole.service_registry.register_service(refresh_contacts_entry)
 

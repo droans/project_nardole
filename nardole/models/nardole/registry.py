@@ -43,6 +43,8 @@ class ServiceEntry(BaseModel):
     service_domain: str
     service_name: str
     grant_opts: list[str] | None = None
+    user_service: bool = True
+    model_service: bool = False
     function: Callable
     service_schema: type[BaseModel] | None = None
     response: Literal["always", "never", "allowed"] = "never"
