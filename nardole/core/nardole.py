@@ -39,7 +39,7 @@ class Nardole:
 
         self.config = load_config_from_path(config_file=config_file)
 
-    def initialize_registries(
+    def initialize(
         self,
         config_entry_json_path: Path | str = CONFIG_ENTRY_PATH,
         permissions_json_path: Path | str = PERMISSIONS_FILE_PATH,
