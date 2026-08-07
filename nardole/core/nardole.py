@@ -53,6 +53,7 @@ class Nardole:
             config_entry_json_path = Path(config_entry_json_path)
 
         self.integration_registry = IntegrationRegistry()
+        self.integration_registry.register_integrations()
         self.config_entry_registry = ConfigEntryRegistry(
             entries_json_path=config_entry_json_path,
             nardole=self,
@@ -60,6 +61,7 @@ class Nardole:
         self.service_registry = ServiceRegistry(
             permission_file_path=permissions_json_path,
         )
+        self.config_entry_registry.load_from_entries()
 
 
 def load_config_from_path(config_file: Path | str) -> ConfigModel:
