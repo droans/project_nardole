@@ -2,7 +2,15 @@
 
 from typing import TYPE_CHECKING
 
-from nardole.const import INDEX_CONTACTS
+from nardole.const import (
+    INDEX_CONTACTS,
+    INDEX_EMAIL_ADDRESSES,
+    INDEX_NAMES,
+    INDEX_NICKNAMES,
+    INDEX_PHONE_NUMBERS,
+    INDEX_PHOTOS,
+    INDEX_URLS,
+)
 from nardole.models.indices.contacts import (
     ContactEmailAddressModel,
     ContactModel,
@@ -26,28 +34,55 @@ class ContactsManager:
     ) -> None:
         """Initialize class."""
         self._client = meilisearch_client
-        self._index = self._client.index(INDEX_CONTACTS)
+        self._contacts_index = self._client.index(INDEX_CONTACTS)
+        self._email_index = self._client.index(INDEX_EMAIL_ADDRESSES)
+        self._name_index = self._client.index(INDEX_NAMES)
+        self._nickname_index = self._client.index(INDEX_NICKNAMES)
+        self._phone_number_index = self._client.index(INDEX_PHONE_NUMBERS)
+        self._photo_index = self._client.index(INDEX_PHOTOS)
+        self._url_index = self._client.index(INDEX_URLS)
 
     def import_contacts(self, contacts: list[ContactModel]) -> None:
         """Import contacts to Meilisearch."""
+        self._contacts_index.add_documents(
+            [contact.model_dump() for contact in contacts],
+        )
 
     def import_contacts_email_addresses(self, contacts: list[ContactEmailAddressModel]) -> None:
         """Import contacts email addresses to Meilisearch."""
+        self._email_index.add_documents(
+            [contact.model_dump() for contact in contacts],
+        )
 
     def import_contacts_names(self, contacts: list[ContactNameModel]) -> None:
         """Import contacts names to Meilisearch."""
+        self._name_index.add_documents(
+            [contact.model_dump() for contact in contacts],
+        )
 
     def import_contacts_nicknames(self, contacts: list[ContactNicknameModel]) -> None:
         """Import contacts nicknames to Meilisearch."""
+        self._nickname_index.add_documents(
+            [contact.model_dump() for contact in contacts],
+        )
 
     def import_contacts_phone_numbers(self, contacts: list[ContactPhoneNumberModel]) -> None:
         """Import contacts phone numbers to Meilisearch."""
+        self._phone_number_index.add_documents(
+            [contact.model_dump() for contact in contacts],
+        )
 
     def import_contacts_photos(self, contacts: list[ContactPhotoModel]) -> None:
         """Import contacts photos to Meilisearch."""
+        self._photo_index.add_documents(
+            [contact.model_dump() for contact in contacts],
+        )
 
     def import_contacts_urls(self, contacts: list[ContactURLModel]) -> None:
         """Import contacts urls to Meilisearch."""
+        self._url_index.add_documents(
+            [contact.model_dump() for contact in contacts],
+        )
 
     def search_contacts_by(
         self,
@@ -87,5 +122,5 @@ class ContactsManager:
                 [f"_foreign(url_keys, url = {url})" for url in urls],
             )
 
-        results = self._index.search("", filters)
+        results = self._contacts_index.search("", filters)
         return [ContactModel.model_validate(hit) for hit in results["hits"]]
