@@ -108,3 +108,5 @@ DEFAULT_STOP_WORDS = [
     "will",
     "with",
 ]
+
+ATTACHMENT_ENDPOINT = "/files"
