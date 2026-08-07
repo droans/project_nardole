@@ -6,11 +6,11 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from nardole.const import SupportedFeatures
+from nardole.const import DATA_DIR, SupportedFeatures
 from nardole.core.contacts import ContactsManager
 from nardole.core.registry.util import load_module_from_path
 from nardole.exceptions import ConfigEntryLoadError
-from nardole.models.nardole.registry import ConfigEntry, LoadedIntegration
+from nardole.models.nardole.registry import ConfigEntry, LoadedIntegration, UnregisteredConfigEntry
 
 if TYPE_CHECKING:
     from nardole.core.nardole import Nardole
@@ -32,11 +32,15 @@ class ConfigEntryRegistry:
         self._entries_path = entries_json_path
         self._contacts_manager = ContactsManager(meilisearch_client=self.nardole.meilisearch_client)
 
-    def load_config_entry(self, config_entry: ConfigEntry) -> LoadedIntegration:
+    def load_config_entry(self, config_entry: UnregisteredConfigEntry) -> LoadedIntegration:
         """Load a config entry."""
         integration = config_entry.integration
         manifest = integration.manifest
         module_path = integration.module_path
+        data_dir = DATA_DIR.joinpath(manifest.domain)
+        config_entry = ConfigEntry.model_validate(
+            {"data_directory": data_dir},
+        )
         try:
             module = load_module_from_path(module_path=module_path)
         except Exception as e:
@@ -84,7 +88,7 @@ class ConfigEntryRegistry:
         """Load config from entries."""
         with open(self._entries_path) as f:
             raw_entries = json.loads(f.read())
-        all_entries = [ConfigEntry.model_validate(entry) for entry in raw_entries]
+        all_entries = [UnregisteredConfigEntry.model_validate(entry) for entry in raw_entries]
         [self.load_config_entry(entry) for entry in all_entries]
 
     def get_config_entry(self, config_entry_id: str) -> LoadedIntegration:
