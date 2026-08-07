@@ -1,0 +1,31 @@
+[project]
+name = "nardole"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "defusedxml>=0.7.1",
+    "dotenv>=0.9.9",
+    "google-api-python-client>=2.198.0",
+    "google-auth-httplib2>=0.4.0",
+    "google-auth-oauthlib>=1.4.0",
+    "ipykernel>=7.3.0",
+    "meilisearch>=0.43.0",
+    "phonenumbers>=9.0.34",
+    "pydantic[email]>=2.13.4",
+    "pydantic-extra-types>=2.11.1",
+    "vobject>=0.9.9",
+    "pyyaml>=6.0.3",
+    "fastapi>=0.141.1",
+    "uvicorn>=0.52.1",
+    "python-magic>=0.4.27",
+]
+
+[dependency-groups]
+dev = [
+    "google-api-python-client-stubs>=1.39.0",
+    "prek>=0.4.11",
+    "ruff>=0.16.0",
+    "ty>=0.0.65",
+]
