@@ -23,11 +23,17 @@ class RegisteredIntegration(Integration):
     entry_id: str
 
 
-class ConfigEntry(BaseModel):
-    """Model for an integration config entry."""
+class UnregisteredConfigEntry(BaseModel):
+    """Model for an integration config entry before registering service."""
 
     integration: RegisteredIntegration
     user_config: dict
+
+
+class ConfigEntry(UnregisteredConfigEntry):
+    """Model for an integration config entry."""
+
+    data_directory: Path
 
 
 class LoadedIntegration(RegisteredIntegration):
