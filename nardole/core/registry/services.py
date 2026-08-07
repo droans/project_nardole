@@ -2,11 +2,14 @@
 
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from nardole.const import PERMISSIONS_FILE_PATH
 from nardole.core.registry.permissions import PermissionsRegistry
 from nardole.exceptions import ServiceCallRegistryError
-from nardole.models.nardole.registry import ServiceEntry
+
+if TYPE_CHECKING:
+    from nardole.models.nardole.registry import ServiceEntry
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +29,7 @@ class ServiceRegistry:
             permissions_registry_file_path=permission_file_path,
         )
 
-    def _get_service_record(self, service_domain: str, service_name: str) -> ServiceEntry | None:
+    def _get_service_record(self, service_domain: str, service_name: str) -> "ServiceEntry | None":
         """Retrieve a service entry if it exists."""
         matches = [
             service
@@ -39,7 +42,7 @@ class ServiceRegistry:
 
     def register_service(
         self,
-        service_entry: ServiceEntry,
+        service_entry: "ServiceEntry",
     ) -> None:
         """Register a service."""
         existing_record = self._get_service_record(

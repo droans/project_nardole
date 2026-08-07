@@ -3,13 +3,16 @@
 import json
 import logging
 from pathlib import Path
-from typing import overload
+from typing import TYPE_CHECKING, overload
 
 from pydantic import ValidationError
 
 from nardole.const import PERMISSIONS_FILE_PATH, PermissionGrant, ServicePermission
 from nardole.exceptions import PermissionManagerError
-from nardole.models.nardole.registry import ServiceCallApprovalRecord, ServiceCallPermissionRecord, ServiceEntry
+from nardole.models.nardole.registry import ServiceCallApprovalRecord, ServiceCallPermissionRecord
+
+if TYPE_CHECKING:
+    from nardole.models.nardole.registry import ServiceEntry
 
 logger = logging.getLogger(__name__)
 
@@ -219,7 +222,7 @@ class PermissionsRegistry:
 
     def register_service_permissions(
         self,
-        service_entry: ServiceEntry,
+        service_entry: "ServiceEntry",
         strict: bool = True,
     ) -> None:
         """Register a single service in the permissions registry."""
