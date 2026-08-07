@@ -11,6 +11,7 @@ from nardole.core.registry.config_entries import ConfigEntryRegistry
 from nardole.core.registry.integrations import IntegrationRegistry
 from nardole.core.registry.services import ServiceRegistry
 from nardole.models.config import ConfigModel
+from nardole.models.indexing import EmbedderSettings
 
 
 class Nardole:
@@ -62,6 +63,13 @@ class Nardole:
             permission_file_path=permissions_json_path,
         )
         self.config_entry_registry.load_from_entries()
+
+    def create_embedder_settings(self, document_template: str) -> EmbedderSettings:
+        """Create the embedder settings for an index."""
+        return EmbedderSettings.model_validate(
+            {"document_template": document_template},
+            **self.config.meilisearch.embedder.model_dump(),
+        )
 
 
 def load_config_from_path(config_file: Path | str) -> ConfigModel:
