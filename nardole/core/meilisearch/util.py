@@ -4,6 +4,7 @@ import time
 from typing import TYPE_CHECKING, Literal
 
 from meilisearch.index import Index
+from meilisearch.models.embedders import RestEmbedder
 
 from nardole.models.indexing import EmbedderSettings
 from nardole.models.indices.settings import (
@@ -188,3 +189,33 @@ def create_index(client: "Client", index_config: IndexConfig) -> None:
         update_index_displayed_attributes(idx, attrs.displayed_attributes)
     if attrs.distinct_attribute:
         update_index_distinct_attributes(idx, attrs.distinct_attribute)
+
+
+def embedder_exists(
+    meilisearch_client: "Client",
+    index_uid: str,
+    embedder_config: EmbedderSettings,
+) -> bool:
+    """Test if an embedder is already setup."""
+    if not index_exists(client=meilisearch_client, index_uid=index_uid):
+        return False
+    index = meilisearch_client.index(index_uid)
+    embedders = index.get_embedders()
+    if not embedders:
+        return False
+    current_embedder = embedders.embedders.get(embedder_config.model_name)
+    if not current_embedder or not isinstance(current_embedder, RestEmbedder):
+        return False
+    cur_template = current_embedder.document_template
+    if cur_template:
+        cur_template = cur_template.strip().replace("\n", "").replace("\r", "")
+    new_template = embedder_config.document_template.strip().replace("\n", "").replace("\r", "")
+    return all(
+        [
+            cur_template == new_template,
+            current_embedder.url == embedder_config.url,
+            current_embedder.dimensions == embedder_config.dimensions,
+            current_embedder.request == embedder_config.request,
+            current_embedder.response == embedder_config.response,
+        ],
+    )
