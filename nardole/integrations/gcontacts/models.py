@@ -9,8 +9,6 @@ from pydantic_extra_types.phone_numbers import PhoneNumberValidator
 
 from nardole.models.integrations.config_entry import BaseIntegrationConfigModel
 
-from .const import DEFAULT_PROCESS_CONTENT_TYPE_PREFIXES, DEFAULT_PROCESS_CONTENT_TYPES
-
 E164NumberType = Annotated[str | phonenumbers.PhoneNumber, PhoneNumberValidator(number_format="E164")]
 
 
@@ -31,8 +29,6 @@ class GoogleContactsConfigModel(BaseIntegrationConfigModel):
 
     domain: Literal["google_contacts"]
     accounts: list[GoogleContactsAccountConfig]
-    save_attachment_types: list[str] = DEFAULT_PROCESS_CONTENT_TYPES
-    save_attachment_type_prefixes: list[str] = DEFAULT_PROCESS_CONTENT_TYPE_PREFIXES
 
 
 """

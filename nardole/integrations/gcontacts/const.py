@@ -2,13 +2,6 @@
 
 DOMAIN = "gcontacts"
 REFRESH_CONTACTS_SERVICE = "refresh_contacts"
-DEFAULT_PROCESS_CONTENT_TYPES = []
-DEFAULT_PROCESS_CONTENT_TYPE_PREFIXES = [
-    "image",
-    "text",
-    "video",
-    "audio",
-]
 FIELD_NONE = "addresses"
 FIELD_EMAIL_ADDRESSES = "emailAddresses"
 FIELD_NAMES = "names"
