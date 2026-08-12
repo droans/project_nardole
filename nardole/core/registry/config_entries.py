@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from nardole.const import DATA_DIR, SupportedFeatures
 from nardole.core.contacts import ContactsManager
-from nardole.core.registry.util import load_module_from_path
+from nardole.core.registry.util import install_manifest_packages, load_module_from_path
 from nardole.exceptions import ConfigEntryLoadError
 from nardole.models.nardole.registry import ConfigEntry, LoadedIntegration, UnregisteredConfigEntry
 
@@ -36,6 +36,11 @@ class ConfigEntryRegistry:
         """Load a config entry."""
         integration = config_entry.integration
         manifest = integration.manifest
+        msg = f"Loading integration {manifest.domain}..."
+        logger.debug(msg)
+        if manifest.requirements:
+            install_manifest_packages(manifest)
+
         module_path = integration.module_path
         data_dir = DATA_DIR.joinpath(manifest.domain)
         config_entry = ConfigEntry.model_validate(
