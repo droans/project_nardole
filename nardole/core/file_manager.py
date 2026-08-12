@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 
 from prompt_toolkit.validation import ValidationError
 
-from nardole.const import FILE_MANAGER_DATA_PATH, SAVE_FILE_PATH
 from nardole.exceptions import FileManagerError
 from nardole.models.indexing import IndexFileModel
 from nardole.models.nardole.registry import FileManagerFileRecord
@@ -25,8 +24,8 @@ class FileManager:
     def __init__(
         self,
         nardole: "Nardole",
-        file_directory: Path = SAVE_FILE_PATH,
-        data_path: Path = FILE_MANAGER_DATA_PATH,
+        file_directory: Path,
+        data_path: Path,
     ) -> None:
         """Initialize class."""
         self.nardole = nardole
@@ -140,6 +139,8 @@ def load_file_manager_data_file(data_path: Path) -> list[FileManagerFileRecord]:
 
 def _create_file_manager_data_file(data_path: Path, overwrite: bool = False) -> None:
     """Create the file manager data file."""
-    data_path.touch(mode=600, exist_ok=overwrite)
+    if not (parent := data_path.parent).exists():
+        parent.mkdir(parents=True)
+    data_path.touch(mode=432, exist_ok=overwrite)
     with open(data_path, "w") as f:
         f.write("[]")

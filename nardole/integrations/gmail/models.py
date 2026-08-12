@@ -64,7 +64,7 @@ class GMailAccountConfig(
 class GMailConfig(BaseIntegrationConfigModel):
     """Model for gmail configuration."""
 
-    type: Literal["gmail"]
+    domain: Literal["gmail"]
     accounts: list[GMailAccountConfig]
 
 

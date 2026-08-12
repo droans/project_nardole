@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from nardole.const import PERMISSIONS_FILE_PATH
 from nardole.exceptions import ServiceCallRegistryError
 
 from . import PermissionsRegistry
@@ -20,7 +19,7 @@ class ServiceRegistry:
 
     def __init__(
         self,
-        permission_file_path: Path | str = PERMISSIONS_FILE_PATH,
+        permission_file_path: Path | str,
     ) -> None:
         """Initialize class."""
         if isinstance(permission_file_path, str):

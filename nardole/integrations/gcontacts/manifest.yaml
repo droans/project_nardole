@@ -1,6 +1,6 @@
 name: Google Contacts
 description: Pull in contacts from your Google account
-domain: gmail
+domain: google_contacts
 supported_features:
   - add_contacts
 requirements:

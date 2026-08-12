@@ -17,7 +17,7 @@ from .const import (
 class SMSBackupAndRestoreConfigModel(BaseIntegrationConfigModel):
     """User config schema."""
 
-    type: Literal["sms_br"]
+    domain: Literal["sms_br"]
     user_phone_number: str
     region: str
     save_attachment_types: list[str] = DEFAULT_PROCESS_CONTENT_TYPES

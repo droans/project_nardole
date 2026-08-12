@@ -21,7 +21,6 @@ from .integration_models import (
 from .parse_xml import get_conversations, parse_sms_xml_data, process_message_xml_model
 
 if TYPE_CHECKING:
-    from nardole.core.contacts import ContactsManager
     from nardole.core.nardole import Nardole
     from nardole.models.nardole.registry import ConfigEntry
 
@@ -35,13 +34,11 @@ class SMSBackupAndRestoreIntegration:
         self,
         nardole: "Nardole",
         config_entry: "ConfigEntry",
-        contacts_manager: "ContactsManager",
     ) -> None:
         """Initialize class."""
         logger.debug("Initializing SMS Backup & Restore integration.")
         self.nardole = nardole
         self.config_entry = config_entry
-        self.contacts_manager = contacts_manager
         try:
             self.config = SMSBackupAndRestoreConfigModel.model_validate(self.config_entry.user_config)
         except ValidationError as e:

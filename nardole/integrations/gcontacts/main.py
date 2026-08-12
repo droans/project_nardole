@@ -33,7 +33,11 @@ class GContactsIntegration:
         try:
             self.config = GoogleContactsConfigModel.model_validate(self.config_entry.user_config)
         except ValidationError as e:
-            msg = "Received validation error when attempting to load config for Google Contacts"
+            msg = (
+                "Received validation error when attempting to load config for Google Contacts"
+                f"\n\nConfig: \n{self.config_entry.user_config}"
+                f"\n\nConfig Entry: \n{self.config_entry}"
+            )
             raise ConfigEntryLoadError(msg) from e
         except Exception as e:
             msg = "Config load failed for Google Contacts"

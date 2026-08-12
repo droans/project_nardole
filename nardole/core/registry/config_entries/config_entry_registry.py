@@ -1,17 +1,23 @@
 """Config entry registry."""
 
+import hashlib
 import json
 import logging
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from nardole.const import DATA_DIR
 from nardole.const.integrations import SupportedFeatures
 from nardole.core.contacts import ContactsManager
 from nardole.core.registry.util import install_manifest_packages, load_module_from_path
 from nardole.exceptions import ConfigEntryLoadError
-from nardole.models.nardole.registry import ConfigEntry, LoadedIntegration, UnregisteredConfigEntry
+from nardole.models.integrations.config_entry import BaseIntegrationConfigModel
+from nardole.models.nardole.registry import (
+    ConfigEntry,
+    LoadedIntegration,
+    RegisteredIntegration,
+    UnregisteredConfigEntry,
+)
 
 if TYPE_CHECKING:
     from nardole.core.nardole import Nardole
@@ -25,12 +31,14 @@ class ConfigEntryRegistry:
     def __init__(
         self,
         entries_json_path: Path,
+        integration_data_path: Path,
         nardole: "Nardole",
     ) -> None:
         """Initialize class."""
         self.config_entries: dict[str, LoadedIntegration] = {}
         self.nardole = nardole
         self._entries_path = entries_json_path
+        self._integration_data_path = integration_data_path
         self._contacts_manager = ContactsManager(meilisearch_client=self.nardole.meilisearch_client)
 
     def load_config_entry(self, config_entry: UnregisteredConfigEntry) -> LoadedIntegration:
@@ -43,9 +51,11 @@ class ConfigEntryRegistry:
             install_manifest_packages(manifest)
 
         module_path = integration.module_path
-        data_dir = DATA_DIR.joinpath(manifest.domain)
-        config_entry = ConfigEntry.model_validate(
-            {"data_directory": data_dir},
+        data_dir = self._integration_data_path.joinpath(manifest.domain)
+        entry = ConfigEntry(
+            integration=config_entry.integration,
+            user_config=config_entry.user_config,
+            data_directory=data_dir,
         )
         try:
             module = load_module_from_path(module_path=module_path)
@@ -56,7 +66,7 @@ class ConfigEntryRegistry:
 
         setup_fn = getattr(module, "setup_from_config_entry", None)
         if setup_fn is None:
-            msg = f"Failed to get setup function for integration {manifest.description}"
+            msg = f"Failed to get setup function for integration {manifest.name}"
             logger.error(msg)
             raise ConfigEntryLoadError(msg)
         if not isinstance(setup_fn, Callable):
@@ -69,7 +79,7 @@ class ConfigEntryRegistry:
 
         setup_kwargs = {
             "nardole": self.nardole,
-            "config_entry": config_entry,
+            "config_entry": entry,
         }
 
         if SupportedFeatures.ADD_CONTACTS in manifest.supported_features:
@@ -82,16 +92,51 @@ class ConfigEntryRegistry:
                 f" {integration.entry_id} for integration {manifest.domain}: {e}"
             )
             logger.exception(msg)
+            raise ConfigEntryLoadError(msg) from e
 
         entry = LoadedIntegration(
-            **config_entry.integration.model_dump(),
+            integration=config_entry.integration,
+            user_config=config_entry.user_config,
             instance=setup_result,
         )
         self.config_entries[integration.entry_id] = entry
         return entry
 
+    def load_from_config(self, config_entries: list[BaseIntegrationConfigModel]) -> None:
+        """Load config entries from the config file."""
+        integration_registry = self.nardole.integration_registry
+        loaded_new_entries = False
+        for entry in config_entries:
+            entry_id = hashlib.sha224(entry.model_dump_json().encode()).hexdigest()
+            if entry_id not in self.config_entries:
+                loaded_new_entries = True
+                integration = integration_registry.integrations.get(entry.domain)
+                if not integration:
+                    msg = f"Cannot find integration for domain {entry.domain}"
+                    raise ConfigEntryLoadError(msg)
+                registered_integration = RegisteredIntegration(
+                    manifest=integration.manifest,
+                    module_path=integration.module_path,
+                    entry_id=entry_id,
+                )
+                config_entry = UnregisteredConfigEntry(
+                    integration=registered_integration,
+                    user_config=entry.model_dump(),
+                )
+                self.load_config_entry(config_entry=config_entry)
+        if loaded_new_entries:
+            processed = []
+            for entry in self.config_entries.values():
+                dumped = entry.model_dump_json(exclude={"instance"})
+                processed.append(dumped)
+            json_data = ", \n    ".join(processed)
+            with open(self._entries_path, "w") as f:
+                f.write(f"[\n    {json_data}\n]")
+
     def load_from_entries(self) -> None:
         """Load config from entries."""
+        if not self._entries_path.exists():
+            _create_config_entries_file(config_entry_path=self._entries_path, overwrite=True)
         with open(self._entries_path) as f:
             raw_entries = json.loads(f.read())
         all_entries = [UnregisteredConfigEntry.model_validate(entry) for entry in raw_entries]
@@ -104,3 +149,12 @@ class ConfigEntryRegistry:
             msg = f"No config entry found with ID {config_entry_id}"
             raise ConfigEntryLoadError(msg)
         return config_entry
+
+
+def _create_config_entries_file(config_entry_path: Path, overwrite: bool = False) -> None:
+    """Create the config entries file."""
+    if not (parent := config_entry_path.parent).exists():
+        parent.mkdir(parents=True)
+    config_entry_path.touch(mode=432, exist_ok=overwrite)
+    with open(config_entry_path, "w") as f:
+        f.write("[]")

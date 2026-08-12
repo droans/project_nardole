@@ -57,13 +57,16 @@ class GMailIndexer:
     def setup_embedder(self) -> None:
         """Setup embedder if not already set."""
         model = self.nardole.create_embedder_settings(DOCUMENT_TEMPLATE)
+        api_key = model.api_key
+        if api_key:
+            api_key = api_key.get_secret_value()
         if embedder_exists(self.meilisearch_client, INDEX_EMAILS, model):
             return
         config = {
             model.model_name: {
                 "source": "rest",
-                "url": model.url,
-                "apiKey": model.api_key,
+                "url": model.url.encoded_string(),
+                "apiKey": api_key,
                 "dimensions": model.dimensions,
                 "request": model.request,
                 "response": model.response,

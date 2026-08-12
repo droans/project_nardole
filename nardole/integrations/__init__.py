@@ -22,7 +22,7 @@ def get_integrations_for_registry() -> list[Integration]:
             manifests.append(
                 Integration(
                     manifest=load_manifest(manifest_file),
-                    module_path=manifest_file,
+                    module_path=manifest_file.parent,
                 ),
             )
         except Exception as e:

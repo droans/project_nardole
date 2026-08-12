@@ -36,11 +36,11 @@ class ConfigEntry(UnregisteredConfigEntry):
     data_directory: Path
 
 
-class LoadedIntegration(RegisteredIntegration):
+class LoadedIntegration(UnregisteredConfigEntry):
     """Model for a loaded integration."""
 
     instance: object
-    runtime_data: Any
+    runtime_data: Any = None
 
 
 class ServiceEntry(BaseModel):

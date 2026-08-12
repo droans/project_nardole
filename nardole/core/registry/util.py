@@ -18,9 +18,8 @@ logger = logging.getLogger(__name__)
 
 def load_module_from_path(module_path: Path) -> ModuleType:
     """Load a single module from path."""
-    spec = importlib.util.spec_from_file_location("instance", module_path)
-    assert spec
-    return importlib.util.module_from_spec(spec)
+    module_dir = f"nardole.integrations.{module_path.name}"
+    return importlib.import_module(module_dir)
 
 
 def _install(args: list[str]) -> str | None:

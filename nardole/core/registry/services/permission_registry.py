@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, overload
 
 from pydantic import ValidationError
 
-from nardole.const import PERMISSIONS_FILE_PATH
 from nardole.const.services import PermissionGrant, ServicePermission
 from nardole.exceptions import PermissionManagerError
 from nardole.models.nardole.registry import ServiceCallApprovalRecord, ServiceCallPermissionRecord
@@ -23,7 +22,7 @@ class PermissionsRegistry:
 
     def __init__(
         self,
-        permissions_registry_file_path: Path = PERMISSIONS_FILE_PATH,
+        permissions_registry_file_path: Path,
     ) -> None:
         """Initialize class."""
         self._registered_permission_records: list[ServiceCallPermissionRecord] = load_permission_file(
@@ -247,7 +246,7 @@ class PermissionsRegistry:
         )
         self._registered_permission_records.append(record)
         with open(self._permissions_registry_file_path, "w") as f:
-            f.write(json.dumps(self._registered_permission_records))
+            f.write(json.dumps([record.model_dump() for record in self._registered_permission_records]))
 
 
 def load_permission_file(permission_file_path: Path) -> list[ServiceCallPermissionRecord]:
@@ -284,6 +283,8 @@ def load_permission_file(permission_file_path: Path) -> list[ServiceCallPermissi
 
 def _create_permission_file(permission_file_path: Path, overwrite: bool = False) -> None:
     """Create the permission file."""
-    permission_file_path.touch(mode=600, exist_ok=overwrite)
+    if not (parent := permission_file_path.parent).exists():
+        parent.mkdir(parents=True)
+    permission_file_path.touch(mode=432, exist_ok=overwrite)
     with open(permission_file_path, "w") as f:
         f.write("[]")

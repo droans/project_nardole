@@ -37,6 +37,6 @@ class MeilisearchConfig(BaseModel):
 class ConfigModel(BaseModel):
     """Model for the user config."""
 
-    api: APIConfig
+    api: APIConfig = APIConfig()
     meilisearch: MeilisearchConfig
     integrations: list[BaseIntegrationConfigModel]
