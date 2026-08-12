@@ -29,3 +29,9 @@ dev = [
     "ruff>=0.16.0",
     "ty>=0.0.65",
 ]
+
+[tool.ty.src]
+exclude = ["**/*.ipynb"]
+
+[tool.ty.analysis]
+replace-imports-with-any = ["googleapiclient.**"]
