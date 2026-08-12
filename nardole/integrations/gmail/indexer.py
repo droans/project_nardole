@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from nardole.core.meilisearch.util import create_index
+from nardole.core.meilisearch.util import create_index, embedder_exists
 
 from .const import (
     DOCUMENT_TEMPLATE,
@@ -57,6 +57,8 @@ class GMailIndexer:
     def setup_embedder(self) -> None:
         """Setup embedder if not already set."""
         model = self.nardole.create_embedder_settings(DOCUMENT_TEMPLATE)
+        if embedder_exists(self.meilisearch_client, INDEX_EMAILS, model):
+            return
         config = {
             model.model_name: {
                 "source": "rest",
