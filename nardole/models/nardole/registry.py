@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel
 
-from nardole.const import CallServiceStatus, ServicePermission
+from nardole.core.registry.services import CallServiceStatus, ServicePermission
 from nardole.models.integrations.manifest import IntegrationManifest
 
 

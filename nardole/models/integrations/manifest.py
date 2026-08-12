@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel
 
-from nardole.const import SupportedFeatures
+from nardole.core.registry.config_entries import SupportedFeatures
 
 
 class IntegrationManifestIndexConfig(BaseModel):

@@ -1,6 +1,6 @@
 """Indexer configurations."""
 
-from nardole.const import INDEX_CONTACTS
+from nardole.core.const import INDEX_CONTACTS
 from nardole.integrations.gmail.const import (
     DOCUMENT_TEMPLATE,
     INDEX_CONVERSATIONS,
