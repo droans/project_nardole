@@ -5,8 +5,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from nardole.const import PERMISSIONS_FILE_PATH
-from nardole.core.registry.permissions import PermissionsRegistry
 from nardole.exceptions import ServiceCallRegistryError
+
+from . import PermissionsRegistry
 
 if TYPE_CHECKING:
     from nardole.models.nardole.registry import ServiceEntry

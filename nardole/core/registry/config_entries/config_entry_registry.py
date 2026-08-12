@@ -6,11 +6,13 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from nardole.const import DATA_DIR, SupportedFeatures
+from nardole.const import DATA_DIR
 from nardole.core.contacts import ContactsManager
 from nardole.core.registry.util import install_manifest_packages, load_module_from_path
 from nardole.exceptions import ConfigEntryLoadError
 from nardole.models.nardole.registry import ConfigEntry, LoadedIntegration, UnregisteredConfigEntry
+
+from .const import SupportedFeatures
 
 if TYPE_CHECKING:
     from nardole.core.nardole import Nardole

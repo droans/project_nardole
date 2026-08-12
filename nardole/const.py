@@ -1,60 +1,6 @@
 """Constants."""
 
-from enum import StrEnum
 from pathlib import Path
-
-
-class SupportedFeatures(StrEnum):
-    """Supported features for integrations."""
-
-    CREATE_INDEX = "create_index"  # Create indices
-    MANAGE_INDEX = "manage_index"  # Manage integration-owned indices
-    CONNECTED_INTEGRATION = "connected_integration"  # Can connect with indices owned by other integrations
-    ADD_DOCUMENTS_TO_SELF = "add_documents_to_self"  # Add documents to owned indices
-    ADD_CONTACTS = "add_contacts"  # Add contacts
-    API = "api"  # API Endpoints
-    USER_SERVICES = "user_services"  # Users can run services
-    AI_TASKS = "ai_tasks"  # Includes features for AI tasks.
-    PROACTIVE_REQUESTS = "proactive_requests"  # Includes features that allows the AI to initiate
-    # requests to the user if permitted.
-
-    PROACTIVE_ACTIONS = "proactive_actions"  # Includes features that allows the AI to perform
-    # tasks without user input if permitted
-
-    MANUAL_ACTIONS = "manual_actions"  # Includes features that allow the AI to perform
-    # tasks with user approval
-
-
-class ServicePermission(StrEnum):
-    """Service permissions."""
-
-    ALWAYS_ASK = "always_ask"
-    ALWAYS_ALLOW = "always_allow"
-    ALWAYS_DENY = "always_deny"
-    UNSET = "unset"
-
-
-class PermissionGrant(StrEnum):
-    """Permission granted by user."""
-
-    ALLOW = "allow"
-    DENY = "deny"
-    ALWAYS_ALLOW = "always_allow"
-    ALWAYS_DENY = "always_deny"
-    ALWAYS_DENY_ALL_MODELS = "always_deny_all_models"
-
-
-class CallServiceStatus(StrEnum):
-    """Service call status."""
-
-    SUCCESS = "success"  # Service successfully called
-    REQUIRES_APPROVAL = "requires_approval"  # Service call requires user approval
-    FORBIDDEN = "forbidden"  # User set permissions to always deny
-    DENIED = "denied"  # User denied service call
-    REJECTED = "rejected"  # Service call rejected for any other reason
-    FAILURE = "failure"  # Service call failed
-    NOT_REGISTERED = "not_registered"  # Service not yet registered
-
 
 DATA_DIR = Path("/", "app", "data")
 STORE_PATH = DATA_DIR.joinpath(".store")
