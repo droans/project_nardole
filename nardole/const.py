@@ -11,13 +11,6 @@ CONFIG_FILE = CONFIG_PATH.joinpath("config.yaml")
 PERMISSIONS_FILE_PATH = STORE_PATH.joinpath("permissions.json")
 SAVE_FILE_PATH = DATA_DIR.joinpath("files")
 
-INDEX_CONTACTS = "contact"
-INDEX_EMAIL_ADDRESSES = "email_addresses"
-INDEX_NAMES = "names"
-INDEX_NICKNAMES = "nicknames"
-INDEX_PHONE_NUMBERS = "phone_numbers"
-INDEX_PHOTOS = "photos"
-INDEX_URLS = "urls"
 
 DEFAULT_STOP_WORDS = [
     "a",

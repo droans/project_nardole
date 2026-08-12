@@ -2,15 +2,6 @@
 
 from typing import TYPE_CHECKING
 
-from nardole.const import (
-    INDEX_CONTACTS,
-    INDEX_EMAIL_ADDRESSES,
-    INDEX_NAMES,
-    INDEX_NICKNAMES,
-    INDEX_PHONE_NUMBERS,
-    INDEX_PHOTOS,
-    INDEX_URLS,
-)
 from nardole.models.indices.contacts import (
     ContactEmailAddressModel,
     ContactModel,
@@ -19,6 +10,16 @@ from nardole.models.indices.contacts import (
     ContactPhoneNumberModel,
     ContactPhotoModel,
     ContactURLModel,
+)
+
+from .const import (
+    INDEX_CONTACTS,
+    INDEX_EMAIL_ADDRESSES,
+    INDEX_NAMES,
+    INDEX_NICKNAMES,
+    INDEX_PHONE_NUMBERS,
+    INDEX_PHOTOS,
+    INDEX_URLS,
 )
 
 if TYPE_CHECKING:
