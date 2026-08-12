@@ -19,8 +19,12 @@ def setup_from_config_entry(
     contacts_manager: "ContactsManager",
 ) -> GMailIntegration:
     """Setup integration from config entry."""
-    return GMailIntegration(
+    integration = GMailIntegration(
         nardole=nardole,
         config_entry=config_entry,
         contacts_manager=contacts_manager,
     )
+    integration.register_services()
+    integration.indexer.setup_indices()
+    integration.indexer.setup_embedder()
+    return integration

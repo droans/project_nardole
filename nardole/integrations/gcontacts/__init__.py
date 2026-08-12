@@ -19,4 +19,6 @@ def setup_from_config_entry(
     contacts_manager: "ContactsManager",
 ) -> GContactsIntegration:
     """Setup integration from config entry."""
-    return GContactsIntegration(nardole=nardole, config_entry=config_entry, contacts_manager=contacts_manager)
+    integration = GContactsIntegration(nardole=nardole, config_entry=config_entry, contacts_manager=contacts_manager)
+    integration.register_services()
+    return integration
