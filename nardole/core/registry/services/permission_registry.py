@@ -254,6 +254,7 @@ def load_permission_file(permission_file_path: Path) -> list[ServiceCallPermissi
     """Load the permission file."""
     if not permission_file_path.exists():
         _create_permission_file(permission_file_path=permission_file_path)
+        return []
     with open(permission_file_path) as f:
         raw_perms = f.read()
     try:
