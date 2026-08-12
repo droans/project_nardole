@@ -8,11 +8,12 @@ import yaml
 from meilisearch import Client
 
 from nardole.const import ATTACHMENT_ENDPOINT, CONFIG_ENTRY_PATH, PERMISSIONS_FILE_PATH, SAVE_FILE_PATH
-from nardole.core.registry.config_entries import ConfigEntryRegistry, IntegrationRegistry
-from nardole.core.registry.services import ServiceRegistry
 from nardole.models.config import ConfigModel
 from nardole.models.indexing import EmbedderSettings
 from nardole.models.indices.settings import IndexFileModel
+
+from .registry.config_entries import ConfigEntryRegistry, IntegrationRegistry
+from .registry.services import ServiceRegistry
 
 
 class Nardole:

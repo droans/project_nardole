@@ -8,8 +8,8 @@ from pathlib import Path
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-from nardole.integrations.gmail.const import DATA_DIRECTORIES, DataPaths
-from nardole.integrations.gmail.models import (
+from .const import DATA_DIRECTORIES, DataPaths
+from .models import (
     ConversationModel,
     EmailFilter,
     EmailModel,

@@ -7,19 +7,6 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-from nardole.integrations.gcontacts.const import (
-    FIELD_EMAIL_ADDRESSES,
-    FIELD_NAMES,
-    FIELD_NICKNAMES,
-    FIELD_PHONE_NUMBERS,
-    FIELD_PHOTOS,
-    FIELD_URLS,
-)
-from nardole.integrations.gcontacts.models import (
-    GContactsApiAnyConnectionsModel,
-    GContactsApiAnyModel,
-    GoogleContactsAccountConfig,
-)
 from nardole.models.indices.contacts import (
     ContactEmailAddressModel,
     ContactModel,
@@ -28,6 +15,20 @@ from nardole.models.indices.contacts import (
     ContactPhoneNumberModel,
     ContactPhotoModel,
     ContactURLModel,
+)
+
+from .const import (
+    FIELD_EMAIL_ADDRESSES,
+    FIELD_NAMES,
+    FIELD_NICKNAMES,
+    FIELD_PHONE_NUMBERS,
+    FIELD_PHOTOS,
+    FIELD_URLS,
+)
+from .models import (
+    GContactsApiAnyConnectionsModel,
+    GContactsApiAnyModel,
+    GoogleContactsAccountConfig,
 )
 
 if TYPE_CHECKING:

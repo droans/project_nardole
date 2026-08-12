@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, HttpUrl, SecretStr
 
-from nardole.models.integrations.config_entry import BaseIntegrationConfigModel
+from .integrations.config_entry import BaseIntegrationConfigModel
 
 
 class EmbedderConfig(BaseModel):

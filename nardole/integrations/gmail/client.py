@@ -10,9 +10,11 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 from nardole.core.nardole import save_attachment
-from nardole.integrations.gmail.const import DataPaths
-from nardole.integrations.gmail.filters import create_filter_string
-from nardole.integrations.gmail.models import (
+from nardole.models.indices.settings import IndexFileModel
+
+from .const import DataPaths
+from .filters import create_filter_string
+from .models import (
     EmailAttachmentConfig,
     EmailFilter,
     EmailFiltersRule,
@@ -24,9 +26,8 @@ from nardole.integrations.gmail.models import (
     ListMessagesResponse,
     MessageIdentifier,
 )
-from nardole.integrations.gmail.process_email import fetch_attachment, process_email
-from nardole.integrations.gmail.utils import get_last_process_datetime_for_account_and_filters
-from nardole.models.indices.settings import IndexFileModel
+from .process_email import fetch_attachment, process_email
+from .utils import get_last_process_datetime_for_account_and_filters
 
 if TYPE_CHECKING:
     from googleapiclient._apis.gmail.v1.resources import GmailResource
@@ -51,11 +52,12 @@ class GMailAPIClient:
         if creds.expired:
             creds.refresh(Request())
 
-        return build(
+        service: GmailResource = build(
             serviceName="gmail",
             version="v1",
             credentials=creds,
         )
+        return service
 
     def get_account_by_name(self, account_name: str) -> GMailAccountConfig | None:
         """Get an account by the account name."""

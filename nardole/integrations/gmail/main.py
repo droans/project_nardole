@@ -4,15 +4,16 @@ import logging
 from typing import TYPE_CHECKING
 
 from nardole.integrations.gcontacts.const import DOMAIN
-from nardole.integrations.gmail.client import GMailAPIClient
-from nardole.integrations.gmail.const import GET_EMAILS_SERVICE
-from nardole.integrations.gmail.indexer import GMailIndexer
-from nardole.integrations.gmail.models import EmailFilter, GetEmailsForAccountServiceSchema, GMailConfig
-from nardole.integrations.gmail.utils import (
+from nardole.models.nardole.registry import ServiceEntry
+
+from .client import GMailAPIClient
+from .const import GET_EMAILS_SERVICE
+from .indexer import GMailIndexer
+from .models import EmailFilter, GetEmailsForAccountServiceSchema, GMailConfig
+from .utils import (
     get_all_conversations,
     store_account_last_process_timestamp,
 )
-from nardole.models.nardole.registry import ServiceEntry
 
 if TYPE_CHECKING:
     from nardole.core.contacts import ContactsManager

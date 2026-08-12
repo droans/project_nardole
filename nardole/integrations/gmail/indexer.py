@@ -3,13 +3,14 @@
 from typing import TYPE_CHECKING
 
 from nardole.core.meilisearch.util import create_index
-from nardole.integrations.gmail.const import (
+
+from .const import (
     DOCUMENT_TEMPLATE,
     INDEX_CONVERSATIONS,
     INDEX_EMAILS,
 )
-from nardole.integrations.gmail.index_configs import create_conversations_index_config, create_email_index_config
-from nardole.integrations.gmail.models import ConversationModel, EmailModel, GMailConfig
+from .index_configs import create_conversations_index_config, create_email_index_config
+from .models import ConversationModel, EmailModel, GMailConfig
 
 if TYPE_CHECKING:
     from nardole.core.contacts import ContactsManager

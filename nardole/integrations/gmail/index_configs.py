@@ -1,19 +1,20 @@
 """Indexer configurations."""
 
 from nardole.core.const import INDEX_CONTACTS
-from nardole.integrations.gmail.const import (
-    DOCUMENT_TEMPLATE,
-    INDEX_CONVERSATIONS,
-    INDEX_EMAILS,
-    PRIMARY_KEY_CONVERSATIONS,
-    PRIMARY_KEY_EMAILS,
-)
 from nardole.models.indexing import EmbedderSettings
 from nardole.models.indices.settings import (
     IndexAttributesConfig,
     IndexAttributesForeignKeyConfig,
     IndexChatConfig,
     IndexConfig,
+)
+
+from .const import (
+    DOCUMENT_TEMPLATE,
+    INDEX_CONVERSATIONS,
+    INDEX_EMAILS,
+    PRIMARY_KEY_CONVERSATIONS,
+    PRIMARY_KEY_EMAILS,
 )
 
 EMAIL_INDEX_CHAT_CONFIG = IndexChatConfig(

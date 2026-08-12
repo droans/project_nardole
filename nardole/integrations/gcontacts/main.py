@@ -5,10 +5,11 @@ from typing import TYPE_CHECKING
 from pydantic import ValidationError
 
 from nardole.exceptions import ConfigEntryLoadError
-from nardole.integrations.gcontacts.client import GContactsAPIClient
-from nardole.integrations.gcontacts.const import DOMAIN, REFRESH_CONTACTS_SERVICE
-from nardole.integrations.gcontacts.models import GoogleContactsConfigModel, RefreshContactsServiceSchema
 from nardole.models.nardole.registry import ServiceEntry
+
+from .client import GContactsAPIClient
+from .const import DOMAIN, REFRESH_CONTACTS_SERVICE
+from .models import GoogleContactsConfigModel, RefreshContactsServiceSchema
 
 if TYPE_CHECKING:
     from nardole.core.contacts import ContactsManager

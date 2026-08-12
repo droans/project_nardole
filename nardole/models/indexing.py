@@ -1,6 +1,6 @@
 """Models related to indexing."""
 
-from nardole.models.config import EmbedderConfig
+from .config import EmbedderConfig
 
 
 class EmbedderSettings(EmbedderConfig):
