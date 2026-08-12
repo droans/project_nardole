@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+tokens
+credentials.json
+**.ipynb
+zzz_test_data
