@@ -32,11 +32,15 @@ def update_index_primary_key(idx: Index, primary_key: str) -> None:
 
 def update_index_embedder_config(idx: Index, embedder_config: EmbedderSettings) -> None:
     """Update the embedder config for an index."""
+    api_key = embedder_config.api_key
+    if api_key:
+        api_key = api_key.get_secret_value()
+
     embed_config = {
         embedder_config.model_name: {
             "source": "rest",
             "url": embedder_config.url,
-            "apiKey": embedder_config.api_key,
+            "apiKey": api_key,
             "dimensions": embedder_config.dimensions,
             "request": embedder_config.request,
             "response": embedder_config.response,

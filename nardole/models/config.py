@@ -10,7 +10,7 @@ class EmbedderConfig(BaseModel):
 
     model_name: str
     url: HttpUrl
-    api_key: str | None = None
+    api_key: SecretStr | None = None
     dimensions: int
 
     # See https://www.meilisearch.com/docs/capabilities/hybrid_search/how_to/configure_rest_embedder
