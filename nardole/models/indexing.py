@@ -14,6 +14,7 @@ class EmbedderSettings(EmbedderConfig):
 class IndexFileModel(BaseModel):
     """Model representing a single index file."""
 
+    domain: str
     file_name: str
     content_type: str
-    src: str
+    uid: str

@@ -1,8 +1,5 @@
 """Project Nardole core modules."""
 
-from .nardole import Nardole, save_attachment
+from .nardole import Nardole
 
-__all__ = (
-    "Nardole",
-    "save_attachment",
-)
+__all__ = ("Nardole",)

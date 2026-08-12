@@ -3,13 +3,13 @@
 import asyncio
 from pathlib import Path
 
-import magic
 import yaml
 from meilisearch import Client
 
-from nardole.const import ATTACHMENT_ENDPOINT, CONFIG_ENTRY_PATH, PERMISSIONS_FILE_PATH, SAVE_FILE_PATH
+from nardole.const import CONFIG_ENTRY_PATH, PERMISSIONS_FILE_PATH
+from nardole.core.file_manager import FileManager
 from nardole.models.config import ConfigModel
-from nardole.models.indexing import EmbedderSettings, IndexFileModel
+from nardole.models.indexing import EmbedderSettings
 
 from .registry.config_entries import ConfigEntryRegistry, IntegrationRegistry
 from .registry.services import ServiceRegistry
@@ -63,6 +63,7 @@ class Nardole:
         self.service_registry = ServiceRegistry(
             permission_file_path=permissions_json_path,
         )
+        self.file_manager = FileManager(nardole=self)
         self.config_entry_registry.load_from_entries()
 
     def create_embedder_settings(self, document_template: str) -> EmbedderSettings:
@@ -78,23 +79,3 @@ def load_config_from_path(config_file: Path | str) -> ConfigModel:
     with open(config_file) as f:
         raw_config = yaml.safe_load(f)
     return ConfigModel.model_validate(raw_config)
-
-
-def save_attachment(unique_id: str, data: str | bytes) -> IndexFileModel:
-    """Save down a single attachment."""
-    content_type = magic.from_buffer(data)
-    mime = magic.from_buffer(data, mime=True)
-    suffix = mime.split("/")[-1]
-    fname = f"{unique_id}.{suffix}"
-    if not SAVE_FILE_PATH.exists():
-        SAVE_FILE_PATH.mkdir()
-    file_path = SAVE_FILE_PATH.joinpath(fname)
-    if not file_path.exists():
-        open_mode = "wb" if isinstance(data, bytes) else "w"
-        with open(fname, open_mode) as f:
-            f.write(data)
-    return IndexFileModel(
-        file_name=fname,
-        content_type=content_type,
-        src=f"{ATTACHMENT_ENDPOINT}/{fname}",
-    )

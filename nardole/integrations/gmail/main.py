@@ -39,6 +39,7 @@ class GMailIntegration:
         self.config = GMailConfig.model_validate(config_entry.user_config)
         self.data_directory = config_entry.data_directory
         self.api_client = GMailAPIClient(
+            nardole=self.nardole,
             config=self.config,
             data_directory=self.data_directory,
         )

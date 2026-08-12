@@ -81,3 +81,11 @@ class ServiceCallPermissionRecord(BaseModel):
     service_name: str
     deny_all_models: bool
     permissions: list[ServiceCallApprovalRecord]
+
+
+class FileManagerFileRecord(BaseModel):
+    """Model for a single file record."""
+
+    file_uid: str
+    file_path: Path
+    domain: str

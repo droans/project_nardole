@@ -9,7 +9,6 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-from nardole.core.nardole import save_attachment
 from nardole.models.indexing import IndexFileModel
 
 from .const import DataPaths
@@ -32,16 +31,19 @@ from .utils import get_last_process_datetime_for_account_and_filters
 if TYPE_CHECKING:
     from googleapiclient._apis.gmail.v1.resources import GmailResource
 
+    from nardole.core.nardole import Nardole
+
 logger = logging.getLogger(__name__)
 
 
 class GMailAPIClient:
     """Client to interact with GMail."""
 
-    def __init__(self, config: GMailConfig, data_directory: Path) -> None:
+    def __init__(self, nardole: "Nardole", config: GMailConfig, data_directory: Path) -> None:
         """Initialize class."""
         self.config = config
         self.data_directory = data_directory
+        self.nardole = nardole
 
     def _create_client(self, account_name: str) -> "GmailResource | None":
         """Create client for account."""
@@ -283,4 +285,9 @@ class GMailAPIClient:
             message_id=message_id,
             attachment_id=attachment_config.attachment_id,
         )
-        return save_attachment(unique_id=attachment_config.attachment_id, data=attachment)
+        return self.nardole.file_manager.store_file(
+            domain=self.config.domain,
+            file_name=attachment_config.filename,
+            content_type=attachment_config.mime_type,
+            bytes_or_text=attachment,
+        )

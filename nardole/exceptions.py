@@ -23,3 +23,7 @@ class ServiceCallRegistryError(Exception):
 
 class PermissionManagerError(Exception):
     """Exception class for errors with the permission registry."""
+
+
+class FileManagerError(Exception):
+    """Exception class for errors with the file manager."""
