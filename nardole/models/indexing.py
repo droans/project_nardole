@@ -1,6 +1,10 @@
 """Models related to indexing."""
 
+from typing import Annotated
+
+import phonenumbers
 from pydantic import BaseModel
+from pydantic_extra_types.phone_numbers import PhoneNumberValidator
 
 from .config import EmbedderConfig
 
@@ -18,3 +22,6 @@ class IndexFileModel(BaseModel):
     file_name: str
     content_type: str
     uid: str
+
+
+E164NumberType = Annotated[str | phonenumbers.PhoneNumber, PhoneNumberValidator(number_format="E164")]

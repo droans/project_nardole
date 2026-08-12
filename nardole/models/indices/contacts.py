@@ -1,13 +1,10 @@
 """Model for the contacts indices."""
 
 import datetime
-from typing import Annotated
 
-import phonenumbers
 from pydantic import BaseModel
-from pydantic_extra_types.phone_numbers import PhoneNumberValidator
 
-E164NumberType = Annotated[str | phonenumbers.PhoneNumber, PhoneNumberValidator(number_format="E164")]
+from nardole.models.indexing import E164NumberType
 
 
 class ContactModel(BaseModel):

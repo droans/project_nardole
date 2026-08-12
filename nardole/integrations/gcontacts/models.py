@@ -1,16 +1,12 @@
 """Integration models."""
 
 import datetime
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 
-import phonenumbers
 from pydantic import BaseModel, FilePath
-from pydantic_extra_types.phone_numbers import PhoneNumberValidator
 
+from nardole.models.indexing import E164NumberType
 from nardole.models.integrations.config_entry import BaseIntegrationConfigModel
-
-E164NumberType = Annotated[str | phonenumbers.PhoneNumber, PhoneNumberValidator(number_format="E164")]
-
 
 """
 User Config
