@@ -148,12 +148,12 @@ def process_email(message_model: GmailMessage) -> EmailModel:
 
     text_parts, attachments = _process_payload_for_body_and_attachments(message_model.payload)
 
-    if "text/html" in text_parts:
-        content_type = "text/html"
-        body = _rewrite_cids(text_parts["text/html"], message_model.id, attachments)
-    elif "text/plain" in text_parts:
+    if "text/plain" in text_parts:
         content_type = "text/plain"
         body = text_parts["text/plain"]
+    elif "text/html" in text_parts:
+        content_type = "text/html"
+        body = _rewrite_cids(text_parts["text/html"], message_model.id, attachments)
     else:
         content_type = "text/plain"
         body = ""
