@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel
 
-from nardole.core.registry.config_entries import SupportedFeatures
+from nardole.const.integrations import IntegrationType, SupportedFeatures
 
 
 class IntegrationManifestIndexConfig(BaseModel):
@@ -20,6 +20,7 @@ class IntegrationManifest(BaseModel):
     # Unique domain for integration, used in user configs
     domain: str
     supported_features: list[SupportedFeatures]
+    integration_types: list[IntegrationType]
 
     requirements: list[str] = []
     connected_indices: list[str] = []

@@ -1,4 +1,4 @@
-"""Service Registry constants."""
+"""Service constants."""
 
 from enum import StrEnum
 

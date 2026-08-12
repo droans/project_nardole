@@ -1,4 +1,4 @@
-"""Integration registry constants."""
+"""Integration constants."""
 
 from enum import StrEnum
 
@@ -35,3 +35,5 @@ class IntegrationType(StrEnum):
     CONVERSATION_EMAIL = "conversation.email"
     CONVERSATION_TEXT_MESSAGES = "conversation.text_messages"
     CONVERSATION_CHATS = "conversation.chat"
+    CONTACTS = "contacts"
+    CALENDAR = "calendar"

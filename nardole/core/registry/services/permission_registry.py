@@ -8,10 +8,9 @@ from typing import TYPE_CHECKING, overload
 from pydantic import ValidationError
 
 from nardole.const import PERMISSIONS_FILE_PATH
+from nardole.const.services import PermissionGrant, ServicePermission
 from nardole.exceptions import PermissionManagerError
 from nardole.models.nardole.registry import ServiceCallApprovalRecord, ServiceCallPermissionRecord
-
-from . import PermissionGrant, ServicePermission
 
 if TYPE_CHECKING:
     from nardole.models.nardole.registry import ServiceEntry
