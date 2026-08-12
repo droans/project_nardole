@@ -76,11 +76,3 @@ class IndexConfig(BaseModel):
     foreign_keys: list[IndexAttributesForeignKeyConfig] | None = None
     attributes: IndexAttributesConfig
     stop_words: list[str] = DEFAULT_STOP_WORDS
-
-
-class IndexFileModel(BaseModel):
-    """Model representing a single index file."""
-
-    file_name: str
-    content_type: str
-    src: str

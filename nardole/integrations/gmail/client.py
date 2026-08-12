@@ -10,7 +10,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 from nardole.core.nardole import save_attachment
-from nardole.models.indices.settings import IndexFileModel
+from nardole.models.indexing import IndexFileModel
 
 from .const import DataPaths
 from .filters import create_filter_string
