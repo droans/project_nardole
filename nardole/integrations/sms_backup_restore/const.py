@@ -1,0 +1,111 @@
+"""Constants."""
+
+from enum import Enum, StrEnum
+from pathlib import Path
+
+DOMAIN = "sms_br"
+IMPORT_SMS_MESSAGES_SERVICE = "import_sms_xml"
+
+RCS_CT_CLS = 135
+
+DEFAULT_PROCESS_CONTENT_TYPES = []
+DEFAULT_PROCESS_CONTENT_TYPE_PREFIXES = [
+    "image",
+    "text",
+    "video",
+    "audio",
+]
+
+
+class MessageType(StrEnum):
+    """Enum for message type."""
+
+    SMS = "sms"
+    MMS = "mms"
+    RCS = "rcs"
+
+
+class AddressType(Enum):
+    """Enum for addr's type field."""
+
+    BCC = 129
+    CC = 130
+    From = 137
+    To = 151
+
+
+class MessageStatus(Enum):
+    """Enum for sms's type field."""
+
+    Received = 1
+    Sent = 2
+    Draft = 3
+    Outbox = 4
+    Failed = 5
+    Queued = 6
+
+
+class SMSStatus(Enum):
+    """Enum for sms's status field."""
+
+    NoStatus = -1
+    Complete = 0
+    Pending = 32
+    Failed = 64
+
+
+CONTENT_TYPE_MESSAGE = "text/plain"
+
+TMP_CONVERSATIONS_PATH = Path("tmp", "conversations.json")
+TMP_CONTACTS_PATH = Path("tmp", "contacts.json")
+TMP_MESSAGES_PATH = Path("tmp", "messages.json")
+ATTACHMENT_DIR = Path(".", "out", "img")
+
+INDEX_SMS_MESSAGES = "sms"
+INDEX_SMS_CONVERSATIONS = "sms_conversations"
+PRIMARY_KEY_SMS_MESSAGES = "message_id"
+PRIMARY_KEY_SMS_CONVERSATIONS = "conversation_id"
+
+DOCUMENT_TEMPLATE = (
+    '{% if doc.direction == "received" %}'
+    '{% assign sender = "sent" %}'
+    "{% elsif doc.contact %}"
+    "{% assign sender = doc.contact %}"
+    "{% else %}"
+    "{% assign sender = doc.sender %}"
+    "{% endif %}"
+    "{% assign message_type = doc.type | upcase %}"
+    '{% assign message = "A," | split: "," %}'
+    "{% if doc.recipients.size > 1 %}"
+    '{% assign message = message | concat: "group" %}'
+    "{% endif %}"
+    "{% assign message = message | concat: message_type %}"
+    '{% if doc.direction == "received" %}'
+    '{% assign message = message | concat: "sent by me on" %}'
+    "{% elsif doc.contact %}"
+    '{% assign message = message | concat: "from" | concat: doc.contact | concat: "received" %}'
+    "{% else %}"
+    '{% assign message = message | concat: "from" | concat: doc.sender | concat: "received" %}'
+    "{% endif %}"
+    "{% assign message = message | concat: doc.readable_date %}"
+    "{% if doc.message or doc.image.length %}"
+    '{% assign message = message | concat: "with" %}'
+    "{% endif %}"
+    "{% if doc.message %}"
+    "{% assign msg = doc.message | truncatewords: 50 %}"
+    '{% assign message = message | concat: "the message" | concat: msg %}'
+    "{% if doc.images %}"
+    '{% assign message = message | concat: "and" %}'
+    "{% endif %}"
+    "{% endif %}"
+    "{% if doc.images %}"
+    '{% assign message = message | concat: "the following attachments:" %}'
+    "{% for image in doc.images %}"
+    "{% capture attach_str %}"
+    "\n- filename: {{image.filename}}, content type: {{image.content_type}}"
+    "{% endcapture %}"
+    "{% assign message = message | concat: attach_str %}"
+    "{% endfor %}"
+    "{% endif %}"
+    "{{ message }}"
+)

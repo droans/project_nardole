@@ -7,9 +7,8 @@ supported_features:
   - add_documents_to_self
   - user_services
 requirements:
-  - google-api-python-client>=2.198.0
-  - google-auth-httplib2>=0.4.0
-  - google-auth-oauthlib>=1.4.0
+  - vobject>=0.9.9
+  - defusedxml>=0.7.1
 integration_types:
   - conversation.text_messages
   - contacts
