@@ -2,16 +2,18 @@
 
 from pathlib import Path
 
+# Directory paths
 DATA_DIR = Path("/", "app", "data")
 STORE_PATH = DATA_DIR.joinpath(".store")
-CONFIG_ENTRY_PATH = STORE_PATH.joinpath("config_entries.json")
 INTEGRATION_DATA_DIR = DATA_DIR.joinpath("integrations")
 CONFIG_PATH = Path("/", "config")
-CONFIG_FILE = CONFIG_PATH.joinpath("config.yaml")
-PERMISSIONS_FILE_PATH = STORE_PATH.joinpath("permissions.json")
-FILE_MANAGER_DATA_PATH = STORE_PATH.joinpath("files.json")
 SAVE_FILE_PATH = DATA_DIR.joinpath("files")
 
+# File paths
+CONFIG_FILE = CONFIG_PATH.joinpath("config.yaml")
+CONFIG_ENTRY_PATH = STORE_PATH.joinpath("config_entries.json")
+PERMISSIONS_FILE_PATH = STORE_PATH.joinpath("permissions.json")
+FILE_MANAGER_DATA_PATH = STORE_PATH.joinpath("files.json")
 
 DEFAULT_STOP_WORDS = [
     "a",
