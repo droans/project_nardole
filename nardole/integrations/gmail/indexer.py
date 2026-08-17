@@ -13,7 +13,7 @@ from .index_configs import create_conversations_index_config, create_email_index
 from .models import ConversationModel, EmailModel
 
 if TYPE_CHECKING:
-    from nardole.core.contacts import ContactsManager
+    from nardole.core.indices.contacts import ContactsIndexer
     from nardole.core.nardole import Nardole
 
     from .models import GMailConfig
@@ -26,7 +26,7 @@ class GMailIndexer:
         self,
         config: "GMailConfig",
         nardole: "Nardole",
-        contacts_manager: "ContactsManager",
+        contacts_manager: "ContactsIndexer",
     ) -> None:
         """Initialize class."""
         self.config = config

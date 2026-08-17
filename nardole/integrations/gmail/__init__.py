@@ -9,14 +9,14 @@ from nardole.models.nardole.registry import ConfigEntry
 CONFIG_SCHEMA = GMailConfig
 
 if TYPE_CHECKING:
-    from nardole.core.contacts import ContactsManager
+    from nardole.core.indices.contacts import ContactsIndexer
     from nardole.core.nardole import Nardole
 
 
 def setup_from_config_entry(
     nardole: "Nardole",
     config_entry: ConfigEntry,
-    contacts_manager: "ContactsManager",
+    contacts_manager: "ContactsIndexer",
 ) -> GMailIntegration:
     """Setup integration from config entry."""
     integration = GMailIntegration(

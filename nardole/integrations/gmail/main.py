@@ -16,7 +16,7 @@ from .utils import (
 )
 
 if TYPE_CHECKING:
-    from nardole.core.contacts import ContactsManager
+    from nardole.core.indices import ContactsIndexer
     from nardole.core.nardole import Nardole
     from nardole.models.nardole.registry import ConfigEntry
 
@@ -30,7 +30,7 @@ class GMailIntegration:
         self,
         nardole: "Nardole",
         config_entry: "ConfigEntry",
-        contacts_manager: "ContactsManager",
+        contacts_manager: "ContactsIndexer",
     ) -> None:
         """Initialize class."""
         self.nardole = nardole

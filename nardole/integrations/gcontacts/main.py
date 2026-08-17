@@ -12,7 +12,7 @@ from .const import DOMAIN, REFRESH_CONTACTS_SERVICE
 from .models import GoogleContactsConfigModel, RefreshContactsServiceSchema
 
 if TYPE_CHECKING:
-    from nardole.core.contacts import ContactsManager
+    from nardole.core.indices.contacts import ContactsIndexer
     from nardole.core.nardole import Nardole
     from nardole.models.nardole.registry import ConfigEntry
 
@@ -24,7 +24,7 @@ class GContactsIntegration:
         self,
         nardole: "Nardole",
         config_entry: "ConfigEntry",
-        contacts_manager: "ContactsManager",
+        contacts_manager: "ContactsIndexer",
     ) -> None:
         """Initialize class."""
         self.nardole = nardole

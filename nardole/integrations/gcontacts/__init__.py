@@ -7,7 +7,7 @@ from nardole.integrations.gcontacts.models import GoogleContactsConfigModel
 from nardole.models.nardole.registry import ConfigEntry
 
 if TYPE_CHECKING:
-    from nardole.core.contacts import ContactsManager
+    from nardole.core.indices.contacts import ContactsIndexer
     from nardole.core.nardole import Nardole
 
 CONFIG_SCHEMA = GoogleContactsConfigModel
@@ -16,7 +16,7 @@ CONFIG_SCHEMA = GoogleContactsConfigModel
 def setup_from_config_entry(
     nardole: "Nardole",
     config_entry: ConfigEntry,
-    contacts_manager: "ContactsManager",
+    contacts_manager: "ContactsIndexer",
 ) -> GContactsIntegration:
     """Setup integration from config entry."""
     integration = GContactsIntegration(nardole=nardole, config_entry=config_entry, contacts_manager=contacts_manager)

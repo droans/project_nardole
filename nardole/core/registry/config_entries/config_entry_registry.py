@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from nardole.const.integrations import SupportedFeatures
-from nardole.core.contacts import ContactsManager
+from nardole.core.indices.contacts import ContactsIndexer
 from nardole.core.registry.util import install_manifest_packages, load_module_from_path
 from nardole.exceptions import ConfigEntryLoadError
 from nardole.models.integrations.config_entry import BaseIntegrationConfigModel
@@ -39,7 +39,7 @@ class ConfigEntryRegistry:
         self.nardole = nardole
         self._entries_path = entries_json_path
         self._integration_data_path = integration_data_path
-        self._contacts_manager = ContactsManager(meilisearch_client=self.nardole.meilisearch_client)
+        self._contacts_manager = ContactsIndexer(meilisearch_client=self.nardole.meilisearch_client)
 
     def load_config_entry(self, config_entry: UnregisteredConfigEntry) -> LoadedIntegration:
         """Load a config entry."""

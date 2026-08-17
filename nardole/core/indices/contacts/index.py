@@ -2,6 +2,15 @@
 
 from typing import TYPE_CHECKING
 
+from nardole.const.indices import (
+    INDEX_CONTACTS,
+    INDEX_CONTACTS_EMAIL_ADDRESSES,
+    INDEX_CONTACTS_NAMES,
+    INDEX_CONTACTS_NICKNAMES,
+    INDEX_CONTACTS_PHONE_NUMBERS,
+    INDEX_CONTACTS_PHOTOS,
+    INDEX_CONTACTS_URLS,
+)
 from nardole.models.indices.contacts import (
     ContactEmailAddressModel,
     ContactModel,
@@ -12,21 +21,11 @@ from nardole.models.indices.contacts import (
     ContactURLModel,
 )
 
-from .const import (
-    INDEX_CONTACTS,
-    INDEX_EMAIL_ADDRESSES,
-    INDEX_NAMES,
-    INDEX_NICKNAMES,
-    INDEX_PHONE_NUMBERS,
-    INDEX_PHOTOS,
-    INDEX_URLS,
-)
-
 if TYPE_CHECKING:
     from meilisearch import Client
 
 
-class ContactsManager:
+class ContactsIndexer:
     """Contacts manager."""
 
     def __init__(
@@ -36,12 +35,12 @@ class ContactsManager:
         """Initialize class."""
         self._client = meilisearch_client
         self._contacts_index = self._client.index(INDEX_CONTACTS)
-        self._email_index = self._client.index(INDEX_EMAIL_ADDRESSES)
-        self._name_index = self._client.index(INDEX_NAMES)
-        self._nickname_index = self._client.index(INDEX_NICKNAMES)
-        self._phone_number_index = self._client.index(INDEX_PHONE_NUMBERS)
-        self._photo_index = self._client.index(INDEX_PHOTOS)
-        self._url_index = self._client.index(INDEX_URLS)
+        self._email_index = self._client.index(INDEX_CONTACTS_EMAIL_ADDRESSES)
+        self._name_index = self._client.index(INDEX_CONTACTS_NAMES)
+        self._nickname_index = self._client.index(INDEX_CONTACTS_NICKNAMES)
+        self._phone_number_index = self._client.index(INDEX_CONTACTS_PHONE_NUMBERS)
+        self._photo_index = self._client.index(INDEX_CONTACTS_PHOTOS)
+        self._url_index = self._client.index(INDEX_CONTACTS_URLS)
 
     def import_contacts(self, contacts: list[ContactModel]) -> None:
         """Import contacts to Meilisearch."""
