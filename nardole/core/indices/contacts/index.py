@@ -84,7 +84,7 @@ class ContactsIndexer:
             [contact.model_dump() for contact in contacts],
         )
 
-    def search_contacts_by(
+    def filter_contacts_by(
         self,
         email_addresses: list[str] | None = None,
         names: list[str] | None = None,
