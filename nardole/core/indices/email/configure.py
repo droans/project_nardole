@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from nardole.const.indices import (
-    INDEX_CONTACTS_EMAIL_ADDRESSES,
+from nardole.const.contacts import INDEX_CONTACTS_EMAIL_ADDRESSES
+from nardole.const.email import (
     INDEX_EMAIL_CONVERSATIONS,
     INDEX_EMAILS,
     EmailConversationIndexFields,

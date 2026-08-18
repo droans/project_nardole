@@ -1,6 +1,6 @@
 """Indexer configurations."""
 
-from nardole.const.indices import INDEX_CONTACTS
+from nardole.const.contacts import INDEX_CONTACTS
 from nardole.models.indexing import EmbedderSettings
 from nardole.models.indices.settings import (
     IndexAttributesConfig,

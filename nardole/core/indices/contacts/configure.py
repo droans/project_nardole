@@ -1,6 +1,6 @@
 """Configure Contacts Index settings."""
 
-from nardole.const.indices import (
+from nardole.const.contacts import (
     INDEX_CONTACTS,
     INDEX_CONTACTS_EMAIL_ADDRESSES,
     INDEX_CONTACTS_NAMES,
