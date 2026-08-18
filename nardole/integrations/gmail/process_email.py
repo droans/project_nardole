@@ -1,200 +1,132 @@
-"""Process emails."""
+"""Process individual emails."""
 
 import base64
-import contextlib
-import re
+import html
+import quopri
+from email import policy
+from email.message import EmailMessage
+from email.parser import Parser
 from email.utils import getaddresses
-from typing import TYPE_CHECKING
+from typing import cast
 
-from .models import (
-    EmailAttachmentConfig,
-    EmailModel,
-    GmailMessage,
-    GmailMessageHeader,
-    GmailMessagePart,
-)
-
-if TYPE_CHECKING:
-    from googleapiclient._apis.gmail.v1.resources import GmailResource
-
-"""
-HAVE:
-    sender: EmailStr
-    to: list[EmailStr]
-    cc: list[EmailStr]
-    bcc: list[EmailStr]
-    timestamp: int
-    id: str
-    thread_id: str
-    label_ids: list[str]
-    content_type: str
-
-NEED:
-    subject: str
-    body: str
-    attachments: str
-"""
+from nardole.core.indices.email.utils import sanitize_email_html
+from nardole.integrations.gmail.const import DOMAIN
+from nardole.integrations.gmail.models import GmailMessage, GmailRawMessage
+from nardole.models.indices.email import EmailAttachmentConfig, EmailModel
 
 
-def _create_header_dict(headers: list[GmailMessageHeader]) -> dict[str, str]:
-    """Create dictionary for headers from the header name."""
-    return {hdr.name.lower(): hdr.value for hdr in headers}
-
-
-def _process_address(addr: str) -> list[str]:
-    """Process a string representing an address."""
-    parsed = getaddresses([addr])
-    result = []
-    for name, email_address in parsed:
-        _nm = name
-        if _nm == "":
-            _nm = None
-        result.append(email_address)
-    return result
-
-
-def _get_content_id(part: GmailMessagePart) -> str | None:
-    """Get the content ID from a message part."""
-    headers = _create_header_dict(part.headers)
-    cid = headers.get("content-id")
-    return cid.strip("<>") if cid else None
-
-
-def _get_text_charset_from_part(part: GmailMessagePart) -> str | None:
-    """Get the charset for text content from a message part."""
-    headers = _create_header_dict(part.headers)
-    ct = headers.get("content-type")
-    if not ct:
-        return None
-    ct_data = ct.split(";")
-    charset_str = [data for data in ct_data if data.strip().startswith("charset")]
-    if not charset_str:
-        return None
-    return charset_str[0].split("=")[-1]
-
-
-def _process_payload_for_body_and_attachments(
-    part: GmailMessagePart,
-) -> tuple[dict[str, str], list[EmailAttachmentConfig]]:
-    """Recursively process payload to combine body and attachment data."""
-    if part.parts:
-        text_parts: dict[str, str] = {}
-        attachments: list[EmailAttachmentConfig] = []
-        for child in part.parts:
-            child_text, child_attachments = _process_payload_for_body_and_attachments(child)
-            text_parts.update(child_text)
-            attachments.extend(child_attachments)
-        return text_parts, attachments
-
-    if part.body.attachmentId:
-        attachment = EmailAttachmentConfig(
-            filename=part.filename,
-            mime_type=part.mimeType,
-            attachment_id=part.body.attachmentId,
-            size=part.body.size,
-            content_id=_get_content_id(part),
+def process_attachments(eml: EmailMessage) -> list[EmailAttachmentConfig]:
+    """Process attachments for an email."""
+    attachments = []
+    for attachment in eml.iter_attachments():
+        filename = attachment.get_filename()
+        if not filename:
+            continue
+        ct = attachment.get_content_type()
+        attachment_id: str | None = attachment.get("content-id")
+        if not isinstance(attachment_id, str):
+            continue
+        attachment_id = attachment_id.removeprefix("<").removesuffix(">")
+        attachments.append(
+            EmailAttachmentConfig(
+                filename=filename,
+                content_type=ct,
+                attachment_id=attachment_id,
+                content_id=attachment_id,
+            ),
         )
-        return {}, [attachment]
-    if part.body.data and part.mimeType in ("text/plain", "text/html"):
-        charset = _get_text_charset_from_part(part) or "utf-8"
-        body = part.body.data.decode(charset, errors="replace")
-        return {part.mimeType: body}, []
-    return {}, []
+    return attachments
 
 
-def _rewrite_cids(html: str, message_id: str, attachments: list[EmailAttachmentConfig]) -> str:
-    """
-    Rewrite CIDs.
-
-    Point cid: references at a resolvable attachment locator instead of a raw
-    Content-ID, and mark the corresponding AttachmentInfo as truly inline.
-    A content_id only "counts" as inline if it's actually used in the HTML —
-    Gmail sometimes stamps Content-ID on ordinary (non-inline) attachments too.
-    """
-    by_cid = {a.content_id: a for a in attachments if a.content_id}
-
-    def replace(match: re.Match) -> str:
-        cid = match.group(1)
-        attachment = by_cid.get(cid)
-        if attachment is None:
-            return match.group(0)  # Unknown CID, leave untouched
-        return f"cid:{message_id}/{attachment.attachment_id}"
-
-    rewritten = re.sub(r'cid:([^"\'\s)]+)', replace, html)
-    referenced_cids = set(re.findall(r'cid:[^/]+/([^"\'\s)]+)', rewritten))
-    for attachment in attachments:
-        if attachment.content_id and attachment.content_id not in referenced_cids:
-            attachment.content_id = None
-    return rewritten
+def parse_addresses(addrs: str) -> list[str]:
+    """Parse the addresses from the passed address header."""
+    parsed = getaddresses([addrs])
+    return [addr[1] for addr in parsed]
 
 
-def process_email(message_model: GmailMessage) -> EmailModel:
-    """Processes a raw email returned from the gmail API and returns it as a model."""
-    headers = _create_header_dict(message_model.payload.headers)
+"""
+        filename: str
+        content_type: str
+    attachment_id: str
+    size: int = 0
+    content_id: str | None = None
 
-    msg_to = _process_address(headers.get("to", ""))
-    msg_from = _process_address(headers.get("from", ""))[0]
 
-    raw_msg_cc = headers.get("cc", "")
-    raw_msg_bcc = headers.get("bcc", "")
-    msg_cc = _process_address(headers.get("cc", "")) if raw_msg_cc else []
-    msg_bcc = _process_address(headers.get("bcc", "")) if raw_msg_bcc else []
-    timestamp = int(int(message_model.internalDate) / 1000)
-    msg_id = message_model.id
-    thread_id = message_model.threadId
-    label_ids = message_model.labelIds
-    mime_type = message_model.payload.mimeType
-    subject = headers.get("subject", "")
+        timestamp: int
+        email_id: str
+        conversation_id: str
+        labels: list[str] = []
+        sender: str
+        to: list[str]
+        cc: list[str]
+        bcc: list[str]
+        subject: str
+        summaries: list[str]
+    attachments: list[EmailAttachmentConfig]
+    account: str
+    domain: str
+"""
 
-    text_parts, attachments = _process_payload_for_body_and_attachments(message_model.payload)
 
-    if "text/plain" in text_parts:
-        content_type = "text/plain"
-        body = text_parts["text/plain"]
-    elif "text/html" in text_parts:
-        content_type = "text/html"
-        body = _rewrite_cids(text_parts["text/html"], message_model.id, attachments)
-    else:
-        content_type = "text/plain"
-        body = ""
+def process_gmail_email_raw(email_msg: GmailRawMessage, account_name: str) -> EmailModel:
+    """Create an EmailModel from email metadata."""
+    raw_email = base64.urlsafe_b64decode(email_msg.raw).decode()
+    eml = Parser(policy=policy.default).parsestr(raw_email)
 
-    with contextlib.suppress(BaseException):
-        body = base64.urlsafe_b64decode(body).decode()
+    raw_sender = eml.get("from")
+    sender = parse_addresses(raw_sender)[0] if isinstance(raw_sender, str) else "N/A"
 
+    raw_to = eml.get("to")
+    _to = parse_addresses(raw_to) if isinstance(raw_to, str) else "N/A"
+
+    raw_cc = eml.get("cc")
+    _cc = parse_addresses(raw_cc) if isinstance(raw_cc, str) else "N/A"
+
+    raw_bcc = eml.get("bcc")
+    _bcc = parse_addresses(raw_bcc) if isinstance(raw_bcc, str) else "N/A"
+
+    subject = eml.get("subject", "N/A")
+    timestamp = int(email_msg.internalDate)
+    email_id = email_msg.id
+    conversation_id = email_msg.threadId
+    labels = email_msg.labelIds
+
+    summaries = []
+    summaries.append(email_msg.snippet)
+    html_body = eml.get_body(["html"])
+    if html_body:
+        body = cast("str", html_body.get_content())
+        body = html.unescape(body)
+        body = quopri.decodestring(body).decode()
+        summaries.append(sanitize_email_html(html=body, return_type="text_only"))
+    text_body = eml.get_body(["plain"])
+    if text_body:
+        summaries.append(cast("str", text_body.get_content()))
+    attachments = process_attachments(eml)
     return EmailModel(
         timestamp=timestamp,
-        id=msg_id,
-        thread_id=thread_id,
-        label_ids=label_ids,
-        mime_type=mime_type,
-        sender=msg_from,
-        to=msg_to,
-        cc=msg_cc,
-        bcc=msg_bcc,
+        email_id=email_id,
+        conversation_id=conversation_id,
+        labels=labels,
+        sender=sender,
+        to=_to,
+        cc=_cc,
+        bcc=_bcc,
         subject=subject,
-        body=body,
-        content_type=content_type,
+        summaries=summaries,
         attachments=attachments,
+        account=account_name,
+        domain=DOMAIN,
     )
 
 
-def fetch_attachment(
-    client: "GmailResource",
-    message_id: str,
-    attachment_id: str,
-) -> bytes:
-    """Download an attachment and return the bytes."""
-    resp = (
-        client.users()
-        .messages()
-        .attachments()
-        .get(
-            userId="me",
-            messageId=message_id,
-            id=attachment_id,
-        )
-        .execute()
-    )
-    data = resp["data"]
-    padded = data + "=" * (-len(data) % 4)
-    return base64.urlsafe_b64decode(padded)
+def process_gmail_email_full(email: GmailMessage) -> EmailModel:
+    """Create an EmailModel from a full email."""
+    raise NotImplementedError
+
+
+def process_gmail_email(email: GmailRawMessage | GmailMessage, account_name: str) -> EmailModel:
+    """Process a single email from GMail."""
+    if isinstance(email, GmailRawMessage):
+        return process_gmail_email_raw(email, account_name=account_name)
+    return process_gmail_email_full(email)

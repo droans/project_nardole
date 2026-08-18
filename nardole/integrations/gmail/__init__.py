@@ -2,29 +2,27 @@
 
 from typing import TYPE_CHECKING
 
-from nardole.integrations.gmail.main import GMailIntegration
+from nardole.integrations.gmail.main import GmailIntegration
 from nardole.integrations.gmail.models import GMailConfig
-from nardole.models.nardole.registry import ConfigEntry
-
-CONFIG_SCHEMA = GMailConfig
 
 if TYPE_CHECKING:
-    from nardole.core.indices.contacts import ContactsIndexer
-    from nardole.core.nardole import Nardole
+    from nardole.core import Nardole
+    from nardole.core.indices import EmailIndexer
+    from nardole.models.nardole.registry import ConfigEntry
+
+CONFIG_SCHEMA = GMailConfig
 
 
 def setup_from_config_entry(
     nardole: "Nardole",
-    config_entry: ConfigEntry,
-    contacts_manager: "ContactsIndexer",
-) -> GMailIntegration:
+    config_entry: "ConfigEntry",
+    email_indexer: "EmailIndexer",
+) -> GmailIntegration:
     """Setup integration from config entry."""
-    integration = GMailIntegration(
+    integration = GmailIntegration(
         nardole=nardole,
         config_entry=config_entry,
-        contacts_manager=contacts_manager,
+        email_indexer=email_indexer,
     )
     integration.register_services()
-    integration.indexer.setup_indices()
-    integration.indexer.setup_embedder()
     return integration

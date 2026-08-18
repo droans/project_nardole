@@ -22,22 +22,10 @@ DATA_DIRECTORIES = (
     DataPaths.METADATA_PATH,
 )
 
-DOCUMENT_TEMPLATE = (
-    "{% assign participants = doc.to | concat: doc.cc.size | concat: doc.bcc %}"
-    "{% if participants.size > 1 %}A group email{%else%}An email{% endif %}"
-    "from"
-    "{{ doc.sender.name}} ({{ doc.sender.email_address }}),"
-    "'{% if doc.subject %}Subject: {{ doc.subject }}, {% endif %}'"
-    "{% if doc.attachments.size %}"
-    "Attachments:"
-    "{% for attachment in doc.attachments %}"
-    "\n- {{ attachment.filename }} (MIME: {{ attachment.mime_type}})"
-    "{% endfor %}"
-    "{%endif%}"
-)
 
-INDEX_EMAILS = "gmail_emails"
-INDEX_CONVERSATIONS = "gmail_conversations"
+class GmailClientError(Exception):
+    """Exception occuring due to GMail API client."""
 
-PRIMARY_KEY_EMAILS = "id"
-PRIMARY_KEY_CONVERSATIONS = "thread_id"
+
+class GmailIntegrationError(Exception):
+    """Exception occuring due to GMail integration."""

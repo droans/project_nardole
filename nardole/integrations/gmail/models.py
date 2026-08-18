@@ -1,4 +1,4 @@
-"""GMail integration models."""
+"""GMail Integration models."""
 
 import datetime
 from typing import Annotated, Any, Literal
@@ -46,7 +46,7 @@ class GetEmailsForAccountServiceSchema(BaseModel):
     """Service schema for GetEmailsForAccount."""
 
     account_names: list[str] | str | None
-    filters: list[EmailFilter] | None = None
+    override_filters: list[EmailFilter] | None = None
     reprocess: bool = False
 
 
@@ -66,43 +66,6 @@ class GMailConfig(BaseIntegrationConfigModel):
 
     domain: Literal["gmail"]
     accounts: list[GMailAccountConfig]
-
-
-class ConversationModel(BaseModel):
-    """Model used to represent a single email thread."""
-
-    thread_id: str
-    participants: list[str]
-    account_name: str
-
-
-class EmailAttachmentConfig(BaseModel):
-    """Model for an email attachment."""
-
-    filename: str
-    mime_type: str
-    attachment_id: str
-    size: int
-    content_id: str | None = None
-
-
-class EmailModel(BaseModel):
-    """Config for a single email."""
-
-    timestamp: int
-    id: str
-    thread_id: str
-    label_ids: list[str]
-    mime_type: str
-    content_type: str
-    sender: str
-    to: list[str]
-    cc: list[str] = []
-    bcc: list[str] = []
-    subject: str | None = None
-    body: str | None = None
-    attachments: list[EmailAttachmentConfig] = []
-    account_name: str | None = None
 
 
 class GmailClassificationLabelFieldValues(BaseModel):
@@ -160,8 +123,18 @@ class GmailMessagePart(BaseModel):
     parts: "list[GmailMessagePart] | None" = None
 
 
-class GmailMessage(BaseModel):
-    """Model for an email message.
+class GMailMetadataMessagePart(BaseModel):
+    """Model for a message part, only containing metadata.
+
+    https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages#Message.MessagePart
+    """
+
+    mimeType: str
+    headers: list[GmailMessageHeader]
+
+
+class BaseGmailMessage(BaseModel):
+    """Base model for an email message.
 
     https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages#Message
     """
@@ -172,10 +145,37 @@ class GmailMessage(BaseModel):
     snippet: str
     historyId: str
     internalDate: str
-    payload: GmailMessagePart
     sizeEstimate: int
-    raw: bytes | None = None
     classificationLabelValues: GmailClassificationLabelValues | None = None
+    raw: bytes | None = None
+    payload: GmailMessagePart | GMailMetadataMessagePart | None = None
+
+
+class GmailRawMessage(BaseGmailMessage):
+    """Model for a raw email message.
+
+    https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages#Message
+    """
+
+    raw: str
+
+
+class GmailMessage(BaseGmailMessage):
+    """Model for an email message.
+
+    https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages#Message
+    """
+
+    payload: GmailMessagePart
+
+
+class GMailMetadataMessage(BaseGmailMessage):
+    """Model for a metadata-only email message.
+
+    https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages#Message
+    """
+
+    payload: GMailMetadataMessagePart
 
 
 class MessageIdentifier(BaseModel):

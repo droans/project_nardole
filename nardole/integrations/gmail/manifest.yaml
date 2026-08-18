@@ -2,12 +2,7 @@ name: GMail
 description: Index emails from your GMail accounts
 domain: gmail
 supported_features:
-  - create_index
-  - manage_index
-  - add_contacts
-  - add_documents_to_self
-  - user_services
-  - api
+  - manage_emails
 requirements:
   - google-api-python-client>=2.198.0
   - google-auth-httplib2>=0.4.0

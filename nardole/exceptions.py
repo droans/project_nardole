@@ -27,3 +27,11 @@ class PermissionManagerError(Exception):
 
 class FileManagerError(Exception):
     """Exception class for errors with the file manager."""
+
+
+class EmailIndexerError(Exception):
+    """Exception class for errors with the Email Indexer."""
+
+
+class NardoleProcessingError(Exception):
+    """Exception class for general data processing errors."""

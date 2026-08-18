@@ -1,49 +1,53 @@
 """GMail API Client."""
 
-import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-from nardole.models.indexing import IndexFileModel
-
-from .const import DataPaths
-from .filters import create_filter_string
-from .models import (
-    EmailAttachmentConfig,
+from nardole.integrations.gmail.const import GmailClientError, GmailIntegrationError
+from nardole.integrations.gmail.filters import create_filter_string
+from nardole.integrations.gmail.models import (
     EmailFilter,
     EmailFiltersRule,
-    EmailModel,
-    FailedItemModel,
     GMailAccountConfig,
     GMailConfig,
     GmailMessage,
+    GMailMetadataMessage,
+    GmailRawMessage,
     ListMessagesResponse,
     MessageIdentifier,
 )
-from .process_email import fetch_attachment, process_email
-from .utils import get_last_process_datetime_for_account_and_filters
+from nardole.integrations.gmail.process_email import process_gmail_email
+from nardole.integrations.gmail.util import get_last_process_datetime_for_account_and_filters
+from nardole.models.indices.email import EmailModel
 
 if TYPE_CHECKING:
     from googleapiclient._apis.gmail.v1.resources import GmailResource
 
-    from nardole.core.nardole import Nardole
+    from nardole.core import Nardole
 
 logger = logging.getLogger(__name__)
 
+GetEmailResponseFormats = Literal["raw", "full"]
+
 
 class GMailAPIClient:
-    """Client to interact with GMail."""
+    """Client to interact with GMail API."""
 
-    def __init__(self, nardole: "Nardole", config: GMailConfig, data_directory: Path) -> None:
+    def __init__(
+        self,
+        nardole: "Nardole",
+        config: GMailConfig,
+        data_directory: Path,
+    ) -> None:
         """Initialize class."""
+        self.nardole = nardole
         self.config = config
         self.data_directory = data_directory
-        self.nardole = nardole
 
     def _create_client(self, account_name: str) -> "GmailResource | None":
         """Create client for account."""
@@ -54,12 +58,11 @@ class GMailAPIClient:
         if creds.expired:
             creds.refresh(Request())
 
-        service: GmailResource = build(
+        return build(
             serviceName="gmail",
             version="v1",
             credentials=creds,
         )
-        return service
 
     def get_account_by_name(self, account_name: str) -> GMailAccountConfig | None:
         """Get an account by the account name."""
@@ -145,41 +148,6 @@ class GMailAPIClient:
                 break
         return result
 
-    def retrieve_single_message(
-        self,
-        client: "GmailResource",
-        message_data: MessageIdentifier,
-    ) -> EmailModel:
-        """Retrieve a single message."""
-        msg_id = message_data.id
-        msg = f"Retrieving message for ID {msg_id}"
-        logger.debug(msg)
-        data = client.users().messages().get(userId="me", id=msg_id).execute()
-        try:
-            parsed = GmailMessage.model_validate(data)
-        except Exception as e:
-            failed_data_path = DataPaths.FAILED_EMAIL_PROCESSING
-            log_msg = f"Failed to parse {msg_id}, writing to {failed_data_path}"
-            logger.exception(log_msg)
-            data = FailedItemModel(
-                exception=e,
-                item=data,
-            )
-            self._write_to_failed_data_json(fail_file_path=failed_data_path, data=data)
-            raise
-        try:
-            return process_email(parsed)
-        except Exception as e:
-            failed_data_path = DataPaths.FAILED_EMAIL_PROCESSING
-            log_msg = f"Failed to process email {msg_id}, writing to {failed_data_path}"
-            logger.exception(log_msg)
-            data = FailedItemModel(
-                exception=e,
-                item=parsed,
-            )
-            self._write_to_failed_data_json(fail_file_path=failed_data_path, data=data)
-            raise
-
     def retrieve_message_data_for_filters(
         self,
         client: "GmailResource",
@@ -205,89 +173,80 @@ class GMailAPIClient:
 
         return result
 
+    def retrieve_message_metadata(
+        self,
+        client: "GmailResource",
+        message_identifiers: MessageIdentifier,
+    ) -> GMailMetadataMessage:
+        """Retrieve the metadata for a single message."""
+        message = client.users().messages().get(userId="me", id=message_identifiers.id, format="metadata")
+        return GMailMetadataMessage.model_validate(message)
+
+    def retrieve_message(
+        self,
+        client: "GmailResource",
+        message_identifiers: MessageIdentifier,
+    ) -> GmailMessage:
+        """Retrieve a single message."""
+        message = client.users().messages().get(userId="me", id=message_identifiers.id, format="full")
+        return GmailMessage.model_validate(message)
+
+    def retrieve_message_raw(
+        self,
+        client: "GmailResource",
+        message_identifiers: MessageIdentifier,
+    ) -> GmailRawMessage:
+        """Retrieve a single message with the raw data."""
+        message = client.users().messages().get(userId="me", id=message_identifiers.id, format="raw")
+        return GmailRawMessage.model_validate(message)
+
     def retrieve_messages(
         self,
         client: "GmailResource",
-        account_name: str,
-        message_data: list[MessageIdentifier],
-    ) -> list[EmailModel]:
-        """Retrieve emails from a list of message data."""
-        result = []
-        for msg_data in message_data:
-            message = self.retrieve_single_message(client=client, message_data=msg_data)
-            message.account_name = account_name
-            result.append(message)
+        message_identifiers: list[MessageIdentifier],
+        response_format: GetEmailResponseFormats = "raw",
+    ) -> list[GmailRawMessage] | list[GmailMessage]:
+        """Retrieve messages by identifier."""
+        funcs = {
+            "raw": self.retrieve_message_raw,
+            "metadata": self.retrieve_message_metadata,
+            "full": self.retrieve_message,
+        }
+        func = funcs.get(response_format)
+        assert func
+        result: list[GmailRawMessage] | list[GmailMessage] = []
+        for identifier in message_identifiers:
+            result.append(func(client=client, message_identifiers=identifier))  # ty: ignore[invalid-argument-type] (Seriously, ty?)
         return result
 
-    def retrieve_all_messages_for_account(
+    def get_all_messages_for_account(
         self,
         account_name: str,
         reprocess: bool = False,
-        _filters: list[EmailFilter] | None = None,
+        override_filters: list[EmailFilter] | None = None,
+        response_format: GetEmailResponseFormats = "raw",
     ) -> list[EmailModel]:
-        """Retrieve all messages for a single account.
-
-        If `reprocess` is False, this function will use the filters and additionally ensure message
-            data is only pulled for new emails since the last run.
-        If `reprocess` is True, this function will only use the filters.
-        """
+        """Retrieve all messages for an account."""
         client = self._create_client(account_name=account_name)
-        account_conf = self.get_account_by_name(account_name=account_name)
-        assert client
-        assert account_conf
-        msg = f"Retrieving all messages for {account_name} (Reprocess: {reprocess})."
-        logger.info(msg)
-        used_filters = _filters or account_conf.filters
-        message_data = self.retrieve_message_data_for_filters(
+        if not client:
+            msg = f"Cannot create client for account {account_name}. Is it defined in your config?"
+            raise GmailClientError(msg)
+        account_config = self.get_account_by_name(account_name=account_name)
+        if not account_config:
+            msg = f"Cannot find account configuration for account {account_name}. Ensure you defined it in your config."
+            raise GmailIntegrationError(msg)
+        msg = f"Retrieving all messages for {account_name} (Reprocessing: {reprocess})"
+        logger.debug(msg)
+        used_filters = override_filters or account_config.filters
+        message_identifiers = self.retrieve_message_data_for_filters(
             client=client,
             account_name=account_name,
             message_filters=used_filters,
             reprocess=reprocess,
         )
-        return self.retrieve_messages(
+        messages = self.retrieve_messages(
             client=client,
-            account_name=account_name,
-            message_data=message_data,
+            message_identifiers=message_identifiers,
+            response_format=response_format,
         )
-
-    def _write_to_failed_data_json(self, fail_file_path: Path, data: FailedItemModel) -> None:
-        """Record failed email processes to the failed data path."""
-        path = self._get_or_create_failed_data_json(fail_file_path=fail_file_path)
-        dumped = data.model_dump()
-        exc = dumped.pop("exception", None)
-        if isinstance(exc, Exception):
-            dumped["exception"] = f"{exc.__class__.__name__} - {exc}"
-        with open(path, "w+") as f:
-            file_data: list = json.loads(f.read())
-            file_data.append(dumped)
-            f.write(json.dumps(file_data))
-
-    def _get_or_create_failed_data_json(self, fail_file_path: Path) -> Path:
-        """Get or create the file for storing a failed message log."""
-        path = Path(self.data_directory, fail_file_path)
-        if not path.exists():
-            path.touch()
-            with open(path, "w") as f:
-                f.write("[]")
-        return path
-
-    def download_attachment(
-        self,
-        account_name: str,
-        message_id: str,
-        attachment_config: EmailAttachmentConfig,
-    ) -> IndexFileModel:
-        """Download a single attachment."""
-        client = self._create_client(account_name=account_name)
-        assert client
-        attachment = fetch_attachment(
-            client=client,
-            message_id=message_id,
-            attachment_id=attachment_config.attachment_id,
-        )
-        return self.nardole.file_manager.store_file(
-            domain=self.config.domain,
-            file_name=attachment_config.filename,
-            content_type=attachment_config.mime_type,
-            bytes_or_text=attachment,
-        )
+        return [process_gmail_email(email=message, account_name=account_name) for message in messages]
