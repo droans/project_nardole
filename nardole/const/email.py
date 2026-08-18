@@ -39,3 +39,17 @@ class EmailConversationIndexFields(StrEnum):
 
 
 REPLACEMENT_IMG_HTML_TAG = "nardole-img"
+
+EMAIL_DOCUMENT_TEMPLATE = (
+    "{% assign participants = doc.to | concat: doc.cc | concat: doc.bcc %}"
+    "{% if participants.size > 1 %}A group email{%else%}An email{% endif %}"
+    "from"
+    " {{ doc.sender }},"
+    "{% if doc.subject %}Subject: '{{ doc.subject }}, {% endif %}'"
+    "{% if doc.attachments.size %}"
+    "Attachments:"
+    "{% for attachment in doc.attachments %}"
+    "\n- {{ attachment.filename }} (Content Type: {{ attachment.content_type}})"
+    "{% endfor %}"
+    "{%endif%}"
+)

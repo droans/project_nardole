@@ -7,10 +7,13 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from nardole.const.email import EMAIL_DOCUMENT_TEMPLATE
 from nardole.const.integrations import SupportedFeatures
+from nardole.core.indices import EmailIndexer
 from nardole.core.indices.contacts import ContactsIndexer
 from nardole.core.registry.util import install_manifest_packages, load_module_from_path
 from nardole.exceptions import ConfigEntryLoadError
+from nardole.models.indexing import EmbedderSettings
 from nardole.models.integrations.config_entry import BaseIntegrationConfigModel
 from nardole.models.nardole.registry import (
     ConfigEntry,
@@ -40,6 +43,17 @@ class ConfigEntryRegistry:
         self._entries_path = entries_json_path
         self._integration_data_path = integration_data_path
         self._contacts_indexer = ContactsIndexer(meilisearch_client=self.nardole.meilisearch_client)
+
+        embedder_conf = self.nardole.config.meilisearch.embedder
+        email_embedder_settings = EmbedderSettings(
+            document_template=EMAIL_DOCUMENT_TEMPLATE,
+            **embedder_conf.model_dump(),
+        )
+        self._email_indexer = EmailIndexer(
+            meilisearch_client=self.nardole.meilisearch_client,
+            embedder_settings=email_embedder_settings,
+        )
+        self._email_indexer.initialize()
 
     def load_config_entry(self, config_entry: UnregisteredConfigEntry) -> LoadedIntegration:
         """Load a config entry."""
@@ -84,6 +98,8 @@ class ConfigEntryRegistry:
 
         if SupportedFeatures.MANAGE_CONTACTS in manifest.supported_features:
             setup_kwargs["contacts_indexer"] = self._contacts_indexer
+        if SupportedFeatures.MANAGE_EMAILS in manifest.supported_features:
+            setup_kwargs["email_indexer"] = self._email_indexer
         try:
             setup_result = setup_fn(**setup_kwargs)
         except Exception as e:
