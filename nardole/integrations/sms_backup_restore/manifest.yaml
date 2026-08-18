@@ -2,9 +2,8 @@ name: SMS Backup & Restore
 description: Index messages from your Android devices
 domain: sms_br
 supported_features:
-  - create_index
-  - manage_index
-  - add_documents_to_self
+  - index
+  - manage_sms
   - user_services
 requirements:
   - vobject>=0.9.9

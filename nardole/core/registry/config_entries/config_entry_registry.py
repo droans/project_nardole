@@ -39,7 +39,7 @@ class ConfigEntryRegistry:
         self.nardole = nardole
         self._entries_path = entries_json_path
         self._integration_data_path = integration_data_path
-        self._contacts_manager = ContactsIndexer(meilisearch_client=self.nardole.meilisearch_client)
+        self._contacts_indexer = ContactsIndexer(meilisearch_client=self.nardole.meilisearch_client)
 
     def load_config_entry(self, config_entry: UnregisteredConfigEntry) -> LoadedIntegration:
         """Load a config entry."""
@@ -82,8 +82,8 @@ class ConfigEntryRegistry:
             "config_entry": entry,
         }
 
-        if SupportedFeatures.ADD_CONTACTS in manifest.supported_features:
-            setup_kwargs["contacts_manager"] = self._contacts_manager
+        if SupportedFeatures.MANAGE_CONTACTS in manifest.supported_features:
+            setup_kwargs["contacts_indexer"] = self._contacts_indexer
         try:
             setup_result = setup_fn(**setup_kwargs)
         except Exception as e:

@@ -6,27 +6,82 @@ from enum import StrEnum
 class SupportedFeatures(StrEnum):
     """Supported features for integrations."""
 
-    # Create indices
-    CREATE_INDEX = "create_index"
+    # Create and manage indices
+    INDEX = "index"
 
-    # Manage integration-owned indices
-    MANAGE_INDEX = "manage_index"
+    # Integration has API endpoints.
+    API = "api"
 
-    # Can connect with indices owned by other integrations
-    CONNECTED_INTEGRATION = "connected_integration"
-    ADD_DOCUMENTS_TO_SELF = "add_documents_to_self"  # Add documents to owned indices
-    ADD_CONTACTS = "add_contacts"  # Add contacts
-    API = "api"  # API Endpoints
-    USER_SERVICES = "user_services"  # Users can run services
-    AI_TASKS = "ai_tasks"  # Includes features for AI tasks.
-    PROACTIVE_REQUESTS = "proactive_requests"  # Includes features that allows the AI to initiate
-    # requests to the user if permitted.
+    """
+        External indices.
 
-    PROACTIVE_ACTIONS = "proactive_actions"  # Includes features that allows the AI to perform
-    # tasks without user input if permitted
+        Support working with indices from other integrations.
+    """
+    # Query indices from other integrations
+    QUERY_EXTERNAL_INDEX = "query_external_index"
 
-    MANUAL_ACTIONS = "manual_actions"  # Includes features that allow the AI to perform
-    # tasks with user approval
+    # Add documents to indices from other integrations
+    ADD_DOCUMENTS_EXTERNAL_INDEX = "add_documents_external_index"
+
+    # Manage the settings for an external index
+    MANAGE_EXTERNAL_INDEX = "manage_external_index"
+
+    """
+        Built-in indices.
+
+        Support working with indices from other integrations.
+    """
+    # Manage contacts
+    #
+    # Declaring support for MANAGE_CONTACTS is required for the ContactsIndexer
+    # to be passed to the integration during setup.
+    MANAGE_CONTACTS = "manage_contacts"
+
+    # Manage Emails
+    #
+    # Declaring support for MANAGE_EMAILS is required for the EmailIndexer
+    # to be passed to the integration during setup.
+    MANAGE_EMAILS = "manage_emails"
+
+    # Manage SMS Messages
+    #
+    # Declaring support for MANAGE_SMS is required for the SMSIndexer
+    # to be passed to the integration during setup.
+    MANAGE_SMS = "manage_sms"
+
+    """
+        Services
+
+        Declare supported service types.
+    """
+    # Declare support for user-initiated services
+    USER_SERVICES = "user_services"
+
+    # Declare support for automated (non-AI) services
+    AUTOMATED_SERVICES = "automated_services"
+
+    # Declare support for AI-run services
+    AI_SERVICES = "ai_services"
+
+    """
+        Proactivity
+
+        Support features that don't require user input prior to running.
+    """
+    # Declare support for proactive notifications
+    PROACTIVE_NOTIFICATIONS = "proactive_notifications"
+
+    # Declare support for initiating conversations with the user
+    INITIATE_CONVERSATION = "initiate_conversation"
+
+    # Declare support for AI-run proactive actions
+    #
+    # While AI_SERVICES allows for AI models to run actions,
+    # PROACTIVE_ACTIONS allows for AI to perform an action without any discussion with the user
+    # IE - an email integration may allow for the AI to receive certain emails and reply to them without input.
+    #
+    # Requires AI_SERVICES support.
+    PROACTIVE_ACTIONS = "proactive_actions"
 
 
 class IntegrationType(StrEnum):

@@ -16,9 +16,9 @@ CONFIG_SCHEMA = GoogleContactsConfigModel
 def setup_from_config_entry(
     nardole: "Nardole",
     config_entry: ConfigEntry,
-    contacts_manager: "ContactsIndexer",
+    contacts_indexer: "ContactsIndexer",
 ) -> GContactsIntegration:
     """Setup integration from config entry."""
-    integration = GContactsIntegration(nardole=nardole, config_entry=config_entry, contacts_manager=contacts_manager)
+    integration = GContactsIntegration(nardole=nardole, config_entry=config_entry, contacts_indexer=contacts_indexer)
     integration.register_services()
     return integration

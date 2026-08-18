@@ -24,12 +24,12 @@ class GContactsIntegration:
         self,
         nardole: "Nardole",
         config_entry: "ConfigEntry",
-        contacts_manager: "ContactsIndexer",
+        contacts_indexer: "ContactsIndexer",
     ) -> None:
         """Initialize class."""
         self.nardole = nardole
         self.config_entry = config_entry
-        self.contacts_manager = contacts_manager
+        self.contacts_indexer = contacts_indexer
         try:
             self.config = GoogleContactsConfigModel.model_validate(self.config_entry.user_config)
         except ValidationError as e:
@@ -70,10 +70,10 @@ class GContactsIntegration:
         contact_photos = self.gcontacts_client.get_all_contact_photos_for_account(account_name=account_name)
         contact_urls = self.gcontacts_client.get_all_contact_urls_for_account(account_name=account_name)
 
-        self.contacts_manager.import_contacts(contacts=contacts)
-        self.contacts_manager.import_contacts_email_addresses(contacts=contact_emails)
-        self.contacts_manager.import_contacts_names(contacts=contact_names)
-        self.contacts_manager.import_contacts_nicknames(contacts=contact_nicknames)
-        self.contacts_manager.import_contacts_phone_numbers(contacts=contact_phone_numbers)
-        self.contacts_manager.import_contacts_photos(contacts=contact_photos)
-        self.contacts_manager.import_contacts_urls(contacts=contact_urls)
+        self.contacts_indexer.import_contacts(contacts=contacts)
+        self.contacts_indexer.import_contacts_email_addresses(contacts=contact_emails)
+        self.contacts_indexer.import_contacts_names(contacts=contact_names)
+        self.contacts_indexer.import_contacts_nicknames(contacts=contact_nicknames)
+        self.contacts_indexer.import_contacts_phone_numbers(contacts=contact_phone_numbers)
+        self.contacts_indexer.import_contacts_photos(contacts=contact_photos)
+        self.contacts_indexer.import_contacts_urls(contacts=contact_urls)
