@@ -23,9 +23,11 @@ EMAILS_INDEX_ATTRIBUTES_CONFIG = IndexAttributesConfig(
         EmailIndexFields.TO,
         EmailIndexFields.CC,
         EmailIndexFields.BCC,
+        EmailIndexFields.ATTACHMENTS_MIME_TYPE,
+        EmailIndexFields.LABELS,
     ],
     searchable_attributes=[
-        EmailIndexFields.ATTACHMENTS,
+        EmailIndexFields.ATTACHMENTS_FILENAME,
         EmailIndexFields.SUBJECT,
         EmailIndexFields.SUMMARIES,
     ],
@@ -41,11 +43,15 @@ EMAILS_INDEX_ATTRIBUTES_CONFIG = IndexAttributesConfig(
         EmailIndexFields.SUMMARIES,
         EmailIndexFields.TIMESTAMP,
         EmailIndexFields.ATTACHMENTS,
+        EmailIndexFields.DOMAIN,
+        EmailIndexFields.ACCOUNT,
+        EmailIndexFields.LABELS,
     ],
 )
 
 EMAIL_CONVERSATION_INDEX_ATTRIBUTES_CONFIG = IndexAttributesConfig(
     filterable_attributes=[
+        EmailConversationIndexFields.CONVERSATION_ID,
         EmailConversationIndexFields.PARTICIPANTS,
         EmailConversationIndexFields.DOMAIN,
         EmailConversationIndexFields.ACCOUNT,

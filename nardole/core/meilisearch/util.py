@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal
 from meilisearch.index import Index
 from meilisearch.models.embedders import RestEmbedder
 
-from nardole.models.indexing import EmbedderSettings
+from nardole.models.indexing import BaseSearchRequest, EmbedderSettings
 from nardole.models.indices.settings import (
     FilterableAttributesConfig,
     IndexAttributesForeignKeyConfig,
@@ -223,3 +223,78 @@ def embedder_exists(
             current_embedder.response == embedder_config.response,
         ],
     )
+
+
+"""
+        offset: int = 0
+        limit: int = 20
+        page: int | None = None
+        hits_per_page: int | None = None
+        semantic_ratio: float = Field(default=0.5, le=1, ge=0)
+        attributes_to_retrieve: list[str] | None = None
+        attributes_to_crop: list[str] | None = None
+        crop_length: int | None = None
+        crop_marker: str | None = None
+        attributes_to_highlight: list[str] | None = None
+        highlight_pre_tag: str | None = None
+        highlight_post_tag: str | None = None
+    kwargs: dict[str, Any] = {}
+"""
+
+
+def generate_single_foreign_filter_string(
+    foreign_field: str,
+    foreign_attribute: str,
+    attr_filter: str | list[str],
+) -> str:
+    """Generate a foreign filter string.
+
+    This cannot perform anything except an equality filter.
+    """
+    if isinstance(attr_filter, str):
+        attr_filter = [attr_filter]
+    attr_filter = [fltr if fltr.isnumeric() else f"'{fltr}'" for fltr in attr_filter]
+    filters = [f"_foreign({foreign_field}, {foreign_attribute} = {fltr})" for fltr in attr_filter]
+    return " OR ".join(filters)
+
+
+def generate_single_filter_string(attribute: str, filters: list[str] | str) -> str:
+    """Generate a single filter string for the attribute."""
+    if isinstance(filters, str):
+        return f"{attribute}={filters}"
+    merged_filters = ",".join(f"'{fltr}'" for fltr in filters)
+    return f"{attribute} IN [{merged_filters}]"
+
+
+def generate_base_search_config_from_model(model: BaseSearchRequest) -> dict:
+    """Generate the base search config used by most all search requests."""
+    result = model.kwargs.copy()
+    if model.offset:
+        result["offset"] = model.offset
+    if model.limit:
+        result["limit"] = model.limit
+    if model.page:
+        result["page"] = model.page
+    if model.hits_per_page:
+        result["hitsPerPage"] = model.hits_per_page
+    if model.semantic_ratio:
+        result["hybrid"] = {
+            "embedder": "default",
+            "semanticRatio": model.semantic_ratio,
+        }
+    if model.attributes_to_retrieve:
+        result["attributesToRetrieve"] = model.attributes_to_retrieve
+    if model.attributes_to_crop:
+        result["attributesToCrop"] = model.attributes_to_crop
+    if model.crop_length:
+        result["cropLength"] = model.crop_length
+    if model.crop_marker:
+        result["cropMarker"] = model.crop_marker
+    if model.attributes_to_highlight:
+        result["attributesToHighlight"] = model.attributes_to_highlight
+    if model.highlight_pre_tag:
+        result["highlightPreTag"] = model.highlight_pre_tag
+    if model.highlight_post_tag:
+        result["highlightPostTag"] = model.highlight_post_tag
+
+    return result

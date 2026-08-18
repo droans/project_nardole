@@ -36,3 +36,6 @@ class EmailConversationIndexFields(StrEnum):
     ACCOUNT = "account"
     DOMAIN = "domain"
     PARTICIPANTS = "participants"
+
+
+REPLACEMENT_IMG_HTML_TAG = "nardole-img"
