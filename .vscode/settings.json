@@ -8,5 +8,8 @@
       "source.organizeImports.ruff": "explicit"
     }
   },
-  "ruff.lineLength": 120
+  "ruff.lineLength": 120,
+  "jupyter.askForKernelRestart": false,
+  "jupyter.notebookFileRoot": "/projects/nardole",
+  "jupyter.logKernelOutputSeparately": true
 }

@@ -15,21 +15,14 @@ line-ending = "lf"
 [lint]
 select = ["ALL"]
 ignore = [
-    "CPY001",   # Missing copyright notice at top of file
-    "D401",    # First line of docstring should be in imperative mood
-    "PTH123",  # `open()` should be replaced by `Path.open()`
-    "DTZ005",  # `datetime.datetime.now()` called without a `tz` argument
-    "DTZ006",  # `datetime.datetime.fromtimestamp()` called without a `tz` argument
-    "FBT001",  # Boolean positional arg in function definition
-    "FBT002",  # Boolean default value in function definition
-    "S101",    # Use of assert detected,
-    # "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed in {name}
-    # "DTZ001",  # `datetime.datetime()` called without a `tzinfo` argument
-    # "DTZ002",  # `datetime.datetime.today()` used
-    # "DTZ007",  # Naive datetime constructed using `datetime.datetime.strptime()` without %z
-    # "ANN003", # Missing type annotation for **kw
-    # "E501",    # line too long
-    # "N999",    # Invalid Module Name
+    "CPY001", # Missing copyright notice at top of file
+    "D401",   # First line of docstring should be in imperative mood
+    "PTH123", # `open()` should be replaced by `Path.open()`
+    "DTZ005", # `datetime.datetime.now()` called without a `tz` argument
+    "DTZ006", # `datetime.datetime.fromtimestamp()` called without a `tz` argument
+    "FBT001", # Boolean positional arg in function definition
+    "FBT002", # Boolean default value in function definition
+    "S101",   # Use of assert detected,
 ]
 
 
@@ -44,12 +37,8 @@ known-first-party = ["GrossOrders"]
 max-complexity = 25
 
 [lint.per-file-ignores]
-"nardole/integrations/gmail/models.py" = [
-    "N815"
-]
-"nardole/integrations/gcontacts/models.py" = [
-    "N815"
-]
+"nardole/integrations/gmail/models.py" = ["N815"]
+"nardole/integrations/gcontacts/models.py" = ["N815"]
 
 [lint.pydocstyle]
 convention = "pep257"
