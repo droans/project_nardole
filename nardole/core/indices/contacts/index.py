@@ -1,6 +1,6 @@
 """Contacts Index Manager."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from nardole.const.contacts import (
     INDEX_CONTACTS,
@@ -42,45 +42,84 @@ class ContactsIndexer:
         self._photo_index = self._client.index(INDEX_CONTACTS_PHOTOS)
         self._url_index = self._client.index(INDEX_CONTACTS_URLS)
 
-    def import_contacts(self, contacts: list[ContactModel]) -> None:
+    def import_contacts(
+        self,
+        contacts: list[ContactModel],
+        add_or_update: Literal["add", "update"] = "add",
+    ) -> None:
         """Import contacts to Meilisearch."""
-        self._contacts_index.add_documents(
+        func = self._contacts_index.add_documents if add_or_update == "add" else self._contacts_index.update_documents
+        func(
             [contact.model_dump() for contact in contacts],
         )
 
-    def import_contacts_email_addresses(self, contacts: list[ContactEmailAddressModel]) -> None:
+    def import_contacts_email_addresses(
+        self,
+        contacts: list[ContactEmailAddressModel],
+        add_or_update: Literal["add", "update"] = "add",
+    ) -> None:
         """Import contacts email addresses to Meilisearch."""
-        self._email_index.add_documents(
+        func = self._email_index.add_documents if add_or_update == "add" else self._email_index.update_documents
+        func(
             [contact.model_dump() for contact in contacts],
         )
 
-    def import_contacts_names(self, contacts: list[ContactNameModel]) -> None:
+    def import_contacts_names(
+        self,
+        contacts: list[ContactNameModel],
+        add_or_update: Literal["add", "update"] = "add",
+    ) -> None:
         """Import contacts names to Meilisearch."""
-        self._name_index.add_documents(
+        func = self._name_index.add_documents if add_or_update == "add" else self._name_index.update_documents
+        func(
             [contact.model_dump() for contact in contacts],
         )
 
-    def import_contacts_nicknames(self, contacts: list[ContactNicknameModel]) -> None:
+    def import_contacts_nicknames(
+        self,
+        contacts: list[ContactNicknameModel],
+        add_or_update: Literal["add", "update"] = "add",
+    ) -> None:
         """Import contacts nicknames to Meilisearch."""
-        self._nickname_index.add_documents(
+        func = self._nickname_index.add_documents if add_or_update == "add" else self._nickname_index.update_documents
+        func(
             [contact.model_dump() for contact in contacts],
         )
 
-    def import_contacts_phone_numbers(self, contacts: list[ContactPhoneNumberModel]) -> None:
+    def import_contacts_phone_numbers(
+        self,
+        contacts: list[ContactPhoneNumberModel],
+        add_or_update: Literal["add", "update"] = "add",
+    ) -> None:
         """Import contacts phone numbers to Meilisearch."""
-        self._phone_number_index.add_documents(
+        func = (
+            self._phone_number_index.add_documents
+            if add_or_update == "add"
+            else self._phone_number_index.update_documents
+        )
+        func(
             [contact.model_dump() for contact in contacts],
         )
 
-    def import_contacts_photos(self, contacts: list[ContactPhotoModel]) -> None:
+    def import_contacts_photos(
+        self,
+        contacts: list[ContactPhotoModel],
+        add_or_update: Literal["add", "update"] = "add",
+    ) -> None:
         """Import contacts photos to Meilisearch."""
-        self._photo_index.add_documents(
+        func = self._photo_index.add_documents if add_or_update == "add" else self._photo_index.update_documents
+        func(
             [contact.model_dump() for contact in contacts],
         )
 
-    def import_contacts_urls(self, contacts: list[ContactURLModel]) -> None:
+    def import_contacts_urls(
+        self,
+        contacts: list[ContactURLModel],
+        add_or_update: Literal["add", "update"] = "add",
+    ) -> None:
         """Import contacts urls to Meilisearch."""
-        self._url_index.add_documents(
+        func = self._url_index.add_documents if add_or_update == "add" else self._url_index.update_documents
+        func(
             [contact.model_dump() for contact in contacts],
         )
 
